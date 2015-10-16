@@ -10,21 +10,22 @@ class DetectionExecutor(
     detectors: Seq[Detector]) {
 
   def detect(username: String, password: String): Message = {
-    val routerIpOption = routerDiscoverer.discoverIp()
-    routerIpOption map { routerIp =>
-      detectors.toStream.flatMap(d =>
-        d.detect(routerIp, username, password)
-      ).headOption getOrElse {
+    val routerIpFork = routerDiscoverer.discoverIp()
+    routerIpFork match {
+      case Right(routerIp) =>
+        detectors.toStream.flatMap(d =>
+          d.detect(routerIp, username, password)
+        ).headOption getOrElse {
+          DetectionError(
+            timestamp = now,
+            message = "Unknown router type"
+          )
+        }
+      case Left(message) =>
         DetectionError(
           timestamp = now,
-          message = "Unknown router type"
+          message = message
         )
-      }
-    } getOrElse {
-      DetectionError(
-        timestamp = now,
-        message = "Can't determine router IP"
-      )
     }
   }
 }
