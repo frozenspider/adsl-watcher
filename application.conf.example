@@ -1,0 +1,14 @@
+db = {
+  url = "jdbc:mysql://localhost:3306/router_watcher"
+  driver = com.mysql.jdbc.Driver
+  user = "root"
+  password = ""
+  keepAliveConnection = true
+  connectionPool = disabled
+}
+
+period = 600000 // 10 minutes
+router = {
+  username = "admin"
+  password = "admin"
+}
