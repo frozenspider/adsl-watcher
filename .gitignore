@@ -18,3 +18,5 @@ RouterWatcher-*.jar
 
 # Application
 application.conf
+log.txt
+log.*.txt*
