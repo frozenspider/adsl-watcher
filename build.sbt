@@ -1,6 +1,6 @@
 name         := "RouterWatcher"
 
-version      := "0.1"
+version      := "1.0"
 
 scalaVersion := "2.11.7"
 
@@ -8,13 +8,6 @@ scalaVersion := "2.11.7"
 EclipseKeys.withSource := true
 
 EclipseKeys.createSrc  := EclipseCreateSrc.Default + EclipseCreateSrc.Resource + EclipseCreateSrc.Managed
-
-
-sourceManaged            <<= baseDirectory { _ / "src-managed" }
-
-sourceManaged in Compile <<= baseDirectory { _ / "src-managed" / "main" / "scala" }
-
-sourceManaged in Test    <<= baseDirectory { _ / "src-managed" / "test" / "scala" }
 
 
 libraryDependencies ++= Seq(

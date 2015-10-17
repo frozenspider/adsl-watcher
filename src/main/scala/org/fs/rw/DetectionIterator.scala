@@ -31,12 +31,17 @@ class DetectionIterator(
             val (_, passedMs) = StopWatch.measure {
               iteration()
             }
-            val toWaitMs = periodMs - passedMs
-            Thread.sleep(if (toWaitMs > 0) toWaitMs else 0)
+            val waitTime = calculateWaitTime(passedMs)
+            Thread.sleep(waitTime)
           }
         } finally {
           dao.tearDown()
         }
+      }
+
+      def calculateWaitTime(passedMs: Long): Long = {
+        val toWaitMs = periodMs - passedMs
+        if (toWaitMs > 0) toWaitMs else 0
       }
 
       def iteration(): Unit = {
