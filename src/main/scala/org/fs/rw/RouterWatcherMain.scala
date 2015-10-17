@@ -14,12 +14,7 @@ object RouterWatcherMain extends App with Logging {
   if (!config.hasPath("router")) {
     log.error("Config file not found or is invalid")
     System.exit(1)
-  } else {
-    import BuildInfo._
-    log.info(s"$name v$version started, awaiting 10 seconds")
   }
-
-  Thread.sleep(10 * 1000)
 
   val detectors = Seq(
     UpvelUR344AN4GPlus
@@ -27,6 +22,9 @@ object RouterWatcherMain extends App with Logging {
   val routerDiscoverer = new RouterDiscoverer()
   val executor = new DetectionExecutor(routerDiscoverer = routerDiscoverer, detectors = detectors)
   val dao = new SlickDao(config = config)
+  scala.sys.addShutdownHook {
+    dao.tearDown()
+  }
 
   val iterator = new DetectionIterator(
     routerDiscoverer = routerDiscoverer,
@@ -34,5 +32,11 @@ object RouterWatcherMain extends App with Logging {
     dao = dao,
     config = config
   )
+
+  {
+    import BuildInfo._
+    log.info(s"$name v$version started, awaiting 10 seconds")
+  }
+  Thread.sleep(10 * 1000)
   iterator.start()
 }
