@@ -24,7 +24,7 @@ object RouterWatcherMain extends App with Logging {
   val dao = new SlickDao(config = config)
   scala.sys.addShutdownHook {
     dao.tearDown()
-    log.error("Shutdown complete")
+    log.info("Shutdown complete")
   }
 
   val iterator = new DetectionIterator(
