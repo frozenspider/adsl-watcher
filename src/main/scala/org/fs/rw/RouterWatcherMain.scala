@@ -14,7 +14,12 @@ object RouterWatcherMain extends App with Logging {
   if (!config.hasPath("router")) {
     log.error("Config file not found or is invalid")
     System.exit(1)
+  } else {
+    import BuildInfo._
+    log.info(s"$name v$version started, awaiting 10 seconds")
   }
+
+  Thread.sleep(10 * 1000)
 
   val detectors = Seq(
     UpvelUR344AN4GPlus
