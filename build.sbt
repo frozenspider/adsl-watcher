@@ -10,13 +10,6 @@ EclipseKeys.withSource := true
 EclipseKeys.createSrc  := EclipseCreateSrc.Default + EclipseCreateSrc.Resource + EclipseCreateSrc.Managed
 
 
-sourceManaged            <<= baseDirectory { _ / "src-managed" }
-
-sourceManaged in Compile <<= baseDirectory { _ / "src-managed" / "main" / "scala" }
-
-sourceManaged in Test    <<= baseDirectory { _ / "src-managed" / "test" / "scala" }
-
-
 libraryDependencies ++= Seq(
   // Logging
   "org.slf4s"              %% "slf4s-api"            % "1.7.12",
