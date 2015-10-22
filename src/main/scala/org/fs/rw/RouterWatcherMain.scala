@@ -13,7 +13,7 @@ object RouterWatcherMain extends App with Logging {
   val config = ConfigFactory.parseFileAnySyntax(new File("application.conf"))
   if (!config.hasPath("router")) {
     log.error("Config file not found or is invalid")
-    System.exit(1)
+    scala.sys.exit(1)
   }
 
   val detectors = Seq(
