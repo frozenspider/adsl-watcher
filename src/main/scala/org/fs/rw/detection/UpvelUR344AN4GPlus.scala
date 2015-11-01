@@ -26,7 +26,7 @@ object UpvelUR344AN4GPlus extends Detector {
         Http(url).auth(username, password).header("Cookie", cookie)
       val authResponse = AuthHttp(s"http://$routerIp").asString
       if (authResponse.code != 200) {
-        Some(Left(DetectionError(timestamp = now, message = "Invalid username or password")))
+        Some(Left(DetectionError.of("Invalid username or password")))
       } else if (!authResponse.body.contains("<TITLE>UR-344AN4G+</TITLE>")) {
         None
       } else {

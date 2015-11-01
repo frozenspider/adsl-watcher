@@ -1,10 +1,11 @@
 package org.fs.rw
 
+import java.net.SocketTimeoutException
+
+import org.fs.rw.detection.Detector
 import org.fs.rw.domain.DetectionError
 import org.fs.rw.domain.Message
 import org.fs.rw.utility.Imports._
-import org.fs.rw.detection.Detector
-import java.net.SocketTimeoutException
 
 class DetectionExecutor(
     routerDiscoverer: RouterDiscoverer,
@@ -16,10 +17,7 @@ class DetectionExecutor(
       case Right(routerIp) =>
         detectWithIp(routerIp)(username, password)
       case Left(message) =>
-        DetectionError(
-          timestamp = now,
-          message = message
-        )
+        DetectionError.of(message)
     }
   }
 
@@ -28,17 +26,11 @@ class DetectionExecutor(
       detectors.toStream.flatMap(d =>
         d.detect(routerIp, username, password)
       ).headOption getOrElse {
-        DetectionError(
-          timestamp = now,
-          message = "Unknown router type"
-        )
+        DetectionError.of("Unknown router type")
       }
     } catch {
       case ex: SocketTimeoutException =>
-        DetectionError(
-          timestamp = now,
-          message = "Router query timeout"
-        )
+        DetectionError.of("Router query timeout")
     }
   }
 }
