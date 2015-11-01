@@ -1,21 +1,33 @@
 package org.fs.rw.detection
 
 import java.io.File
+import java.io.IOException
 import java.io.PrintWriter
 
+import org.fs.rw.domain.DetectionError
 import org.fs.rw.domain.Message
 import org.fs.rw.utility.Imports._
 import org.slf4s.Logging
 
 trait Detector extends Logging {
+
+  type GetContentType = Option[Either[Message, String]]
+
   def detect(routerIp: String, username: String, password: String): Option[Message] = {
-    val content = getContent(routerIp, username, password)
+    val content: Either[Exception, GetContentType] =
+      try {
+        Right(getContent(routerIp, username, password))
+      } catch {
+        case ex: IOException => Left(ex)
+      }
     content match {
-      case None =>
+      case Left(ex) =>
+        Some(DetectionError.of("Failed to load content: " + ex))
+      case Right(None) =>
         None
-      case Some(Left(message)) =>
+      case Right(Some(Left(message))) =>
         Some(message)
-      case Some(Right(content)) =>
+      case Right(Some(Right(content))) =>
         try {
           Some(parseContent(content))
         } catch {
@@ -26,7 +38,7 @@ trait Detector extends Logging {
     }
   }
 
-  def getContent(routerIp: String, username: String, password: String): Option[Either[Message, String]]
+  def getContent(routerIp: String, username: String, password: String): GetContentType
 
   def parseContent(content: String): Message
 
