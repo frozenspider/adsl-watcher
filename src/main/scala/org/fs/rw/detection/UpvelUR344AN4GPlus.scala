@@ -18,23 +18,19 @@ object UpvelUR344AN4GPlus extends Detector {
                           username: String,
                           password: String): GetContentType = {
     val rootResponse = Http(s"http://$routerIp").asString
-    if (rootResponse.code != 401) {
+    if (rootResponse.code != 401 || !rootResponse.headers.contains("Set-Cookie")) {
       None
     } else {
-      rootResponse.headers.get("Set-Cookie") match {
-        case None =>
-          Some(Left(DetectionError.of("Set-Cookie header is missing")))
-        case Some(cookie) =>
-          def AuthHttp(url: String) =
-            Http(url).auth(username, password).header("Cookie", cookie)
-          val authResponse = AuthHttp(s"http://$routerIp").asString
-          if (authResponse.code != 200) {
-            Some(Left(DetectionError.of("Invalid username or password")))
-          } else if (!authResponse.body.contains("<TITLE>UR-344AN4G+</TITLE>")) {
-            None
-          } else {
-            Some(Right(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
-          }
+      val cookie = rootResponse.headers("Set-Cookie")
+      def AuthHttp(url: String) =
+        Http(url).auth(username, password).header("Cookie", cookie)
+      val authResponse = AuthHttp(s"http://$routerIp").asString
+      if (authResponse.code != 200) {
+        Some(Left(DetectionError.of("Invalid username or password")))
+      } else if (!authResponse.body.contains("<TITLE>UR-344AN4G+</TITLE>")) {
+        None
+      } else {
+        Some(Right(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
       }
     }
   }

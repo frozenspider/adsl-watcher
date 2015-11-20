@@ -11,6 +11,24 @@ import org.slf4s.Logging
 
 trait Detector extends Logging {
 
+  /**
+   * Response from content fetching function.
+   * Meaning is as follows:
+   * <table>
+   *  <tr>
+   *   <td>{@code None}</td>
+   *   <td>Router model does not belong to this detector</td>
+   *  </tr>
+   *  <tr>
+   *   <td>{@code Some(Left(msg))}</td>
+   *   <td>Content fetching fails, might mean configuration error or application bug</td>
+   *  </tr>
+   *  <tr>
+   *    <td>{@code Some(Right(content))}</td>
+   *    <td>Content fetched and returned</td>
+   *  </tr>
+   * </table>
+   */
   type GetContentType = Option[Either[Message, String]]
 
   def detect(routerIp: String, username: String, password: String): Option[Message] = {
