@@ -1,4 +1,4 @@
-name         := "RouterWatcher"
+name         := "router-watcher"
 
 version      := "1.2"
 
