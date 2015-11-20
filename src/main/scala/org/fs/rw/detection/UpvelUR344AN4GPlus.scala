@@ -36,7 +36,6 @@ object UpvelUR344AN4GPlus extends Detector {
             Some(Right(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
           }
       }
-
     }
   }
 

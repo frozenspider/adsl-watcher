@@ -14,11 +14,11 @@ trait Detector extends Logging {
   type GetContentType = Option[Either[Message, String]]
 
   def detect(routerIp: String, username: String, password: String): Option[Message] = {
-    val content: Either[Exception, GetContentType] =
+    val content: Either[Throwable, GetContentType] =
       try {
         Right(getContent(routerIp, username, password))
       } catch {
-        case ex: IOException => Left(ex)
+        case ex: Throwable => Left(ex)
       }
     content match {
       case Left(ex) =>
