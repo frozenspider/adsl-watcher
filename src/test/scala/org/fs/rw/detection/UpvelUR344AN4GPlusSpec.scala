@@ -1,11 +1,14 @@
 package org.fs.rw.detection
 
+import java.io.File
+
+import scala.io.Source
+
+import org.fs.rw.domain.RouterInfo
+
 import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
-import org.apache.commons.lang3.ClassPathUtils
-import java.io.File
-import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
 class UpvelUR344AN4GPlusSpec
@@ -18,19 +21,19 @@ class UpvelUR344AN4GPlusSpec
   // FIXME: Improve tests
   it should "parse the up state" in {
     val content = Source.fromFile(new File(routerFolder, "up.htm")).mkString
-    val parsed = instance.parse(content)
+    val parsed = instance.parseContent(content).asInstanceOf[RouterInfo]
     assert(parsed.lineUpOption === Some(true))
   }
 
   it should "parse the up/disconnected state" in {
     val content = Source.fromFile(new File(routerFolder, "up-disconnected.htm")).mkString
-    val parsed = instance.parse(content)
+    val parsed = instance.parseContent(content).asInstanceOf[RouterInfo]
     assert(parsed.lineUpOption === Some(true))
   }
 
   it should "parse the wait-for-init state" in {
     val content = Source.fromFile(new File(routerFolder, "wait-for-init.htm")).mkString
-    val parsed = instance.parse(content)
+    val parsed = instance.parseContent(content).asInstanceOf[RouterInfo]
     assert(parsed.lineUpOption === Some(false))
   }
 

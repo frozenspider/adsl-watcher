@@ -132,7 +132,7 @@ class SlickDao(config: Config) extends Dao with Logging {
       def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
       def timestamp = column[DateTime]("timestamp")
       def message = column[String]("message")
-      def * = (id.?, timestamp, message) <> (DetectionError.tupled, DetectionError.unapply)
+      def * = (id.?, timestamp, message) <> ((DetectionError.apply _).tupled, DetectionError.unapply)
     }
   }
 }

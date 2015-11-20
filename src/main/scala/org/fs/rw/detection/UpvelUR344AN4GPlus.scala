@@ -14,9 +14,11 @@ object UpvelUR344AN4GPlus extends Detector {
 
   val deviceInfoUri = "cgi-bin/status_deviceinfo.asp"
 
-  override def detect(routerIp: String, username: String, password: String): Option[Message] = {
+  override def getContent(routerIp: String,
+                          username: String,
+                          password: String): GetContentType = {
     val rootResponse = Http(s"http://$routerIp").asString
-    if (rootResponse.code != 401) {
+    if (rootResponse.code != 401 || !rootResponse.headers.contains("Set-Cookie")) {
       None
     } else {
       val cookie = rootResponse.headers("Set-Cookie")
@@ -24,16 +26,16 @@ object UpvelUR344AN4GPlus extends Detector {
         Http(url).auth(username, password).header("Cookie", cookie)
       val authResponse = AuthHttp(s"http://$routerIp").asString
       if (authResponse.code != 200) {
-        Some(DetectionError(timestamp = now, message = "Invalid username or password" + rootResponse.code))
+        Some(Left(DetectionError.of("Invalid username or password")))
       } else if (!authResponse.body.contains("<TITLE>UR-344AN4G+</TITLE>")) {
         None
       } else {
-        Some(parse(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
+        Some(Right(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
       }
     }
   }
 
-  def parse(content: String): RouterInfo = {
+  override def parseContent(content: String): Message = {
     val (res, time) = StopWatch.measure {
       val body = parseElement(content) \ "body"
       val tableStateCellsText = {
