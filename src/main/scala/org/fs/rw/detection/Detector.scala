@@ -31,6 +31,7 @@ trait Detector extends Logging {
    */
   type GetContentType = Option[Either[Message, String]]
 
+  /** Detect a router connection values, returning None if router model belong to this detector */
   def detect(routerIp: String, username: String, password: String): Option[Message] = {
     val content: Either[Throwable, GetContentType] =
       try {
@@ -61,14 +62,15 @@ trait Detector extends Logging {
   def parseContent(content: String): Message
 
   private def dump(content: String): Unit = {
-    val filename = s"content-${getClass.getSimpleName}-${now.toString("yyyy-MM-dd_HH-mm")}.txt"
+    val filename = s"${now.toString("yyyy-MM-dd_HH-mm")}_${getClass.getSimpleName}.txt"
     val file = new File(filename)
-    log.info(s"Dumped router content to ${file.getAbsolutePath}")
     val pw = new PrintWriter(file, "UTF-8")
     try {
       pw.write(content)
+      pw.flush()
     } finally {
       pw.close()
     }
+    log.info(s"Dumped router content to ${file.getAbsolutePath}")
   }
 }
