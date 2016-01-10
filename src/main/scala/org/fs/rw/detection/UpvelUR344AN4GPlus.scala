@@ -8,8 +8,6 @@ import org.fs.rw.domain.RouterInfo
 import org.fs.rw.utility.Imports._
 import org.fs.rw.utility.StopWatch
 
-import scalaj.http.Http
-
 object UpvelUR344AN4GPlus extends Detector {
 
   val deviceInfoUri = "cgi-bin/status_deviceinfo.asp"
@@ -17,20 +15,18 @@ object UpvelUR344AN4GPlus extends Detector {
   override def getContent(routerIp: String,
                           username: String,
                           password: String): GetContentType = {
-    val rootResponse = Http(s"http://$routerIp").asString
-    if (rootResponse.code != 401 || !rootResponse.headers.contains("Set-Cookie")) {
+    val (client, cookieStore) = makeSimpleClientWithStore()
+    val rootResponse = client.request(GET(s"http://$routerIp"))
+    if (rootResponse.code != 401 || cookieStore.cookies.isEmpty) {
       None
     } else {
-      val cookie = rootResponse.headers("Set-Cookie")
-      def AuthHttp(url: String) =
-        Http(url).auth(username, password).header("Cookie", cookie)
-      val authResponse = AuthHttp(s"http://$routerIp").asString
+      val authResponse = client.request(GET(s"http://$routerIp/$deviceInfoUri").basicAuth(username, password))
       if (authResponse.code != 200) {
         Some(Left(DetectionError.of("Invalid username or password")))
-      } else if (!authResponse.body.contains("<TITLE>UR-344AN4G+</TITLE>")) {
+      } else if (!authResponse.bodyString.contains("<TITLE>UR-344AN4G+</TITLE>")) {
         None
       } else {
-        Some(Right(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
+        Some(Right(authResponse.bodyString))
       }
     }
   }
