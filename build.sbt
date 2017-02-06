@@ -1,6 +1,6 @@
 name         := "router-watcher"
 version      := "1.3"
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 EclipseKeys.withSource := true
 EclipseKeys.createSrc  := EclipseCreateSrc.Default + EclipseCreateSrc.Resource + EclipseCreateSrc.Managed
@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick"      %% "slick"                % "3.1.0",
   "mysql"                   %  "mysql-connector-java" % "5.1.36",
   // Other
-  "com.github.frozenspider" %  "scala-web-utils"      % "0.1",
+  "com.github.frozenspider" %% "fs-web-utils"         % "0.4.1",
   "org.apache.commons"      %  "commons-lang3"        % "3.4",
   "com.github.nscala-time"  %  "nscala-time_2.11"     % "2.2.0",
   "com.typesafe"            %  "config"               % "1.3.0",
