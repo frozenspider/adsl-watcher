@@ -8,29 +8,25 @@ import org.fs.rw.domain.RouterInfo
 import org.fs.rw.utility.Imports._
 import org.fs.rw.utility.StopWatch
 
-import scalaj.http.Http
-
 object UpvelUR344AN4GPlus extends Detector {
 
-  val deviceInfoUri = "cgi-bin/status_deviceinfo.asp"
+  val deviceInfoUri: String = "cgi-bin/status_deviceinfo.asp"
 
   override def getContent(routerIp: String,
                           username: String,
                           password: String): GetContentType = {
-    val rootResponse = Http(s"http://$routerIp").asString
-    if (rootResponse.code != 401 || !rootResponse.headers.contains("Set-Cookie")) {
+    val (client, cookieStore) = simpleClientWithStore()
+    val rootResponse = client.request(GET(s"http://$routerIp"))
+    if (rootResponse.code != 401 || cookieStore.cookies.isEmpty) {
       None
     } else {
-      val cookie = rootResponse.headers("Set-Cookie")
-      def AuthHttp(url: String) =
-        Http(url).auth(username, password).header("Cookie", cookie)
-      val authResponse = AuthHttp(s"http://$routerIp").asString
+      val authResponse = client.request(GET(s"http://$routerIp/$deviceInfoUri").addBasicAuth(username, password))
       if (authResponse.code != 200) {
         Some(Left(DetectionError.of("Invalid username or password")))
-      } else if (!authResponse.body.contains("<TITLE>UR-344AN4G+</TITLE>")) {
+      } else if (!authResponse.bodyString.contains("<TITLE>UR-344AN4G+</TITLE>")) {
         None
       } else {
-        Some(Right(AuthHttp(s"http://$routerIp/$deviceInfoUri").asString.body))
+        Some(Right(authResponse.bodyString))
       }
     }
   }
@@ -40,12 +36,12 @@ object UpvelUR344AN4GPlus extends Detector {
       val body = parseElement(content) \ "body"
       val tableStateCellsText = {
         val tables = (body \ "form" \ "table")(_.child.size > 0)
-        tables(1) \ "tr" \ "td" filterByClass "tabdata" map (_.cleanText)
+        tables(1) \ "tr" \ "td" filterByClass "tabdata" map (_.trimmedText)
       }
       val serverIpOption = {
         val statusBlock = body \ "form" \ "tr" \ "td"
         val statusIdx = statusBlock indexWhere (_.text.contains("Status"))
-        parseServerIpOption((statusBlock(statusIdx + 7) \ "table" \ "tr" \ "td")(0).cleanText)
+        parseServerIpOption((statusBlock(statusIdx + 7) \ "table" \ "tr" \ "td")(0).trimmedText)
       }
       RouterInfo(
         timestamp = DateTime.now,
