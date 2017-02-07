@@ -13,10 +13,10 @@ src-managed/
 # Development
 /_build
 _assemble.*
-RouterWatcher-*.jar
+router-watcher-*.jar
 buildinfo.*
 
 # Application
 application.conf
-log.txt
-log.*.txt*
+router-watcher.log
+router-watcher.*.log*
