@@ -6,10 +6,11 @@ import org.fs.rw.detection.Detector
 import org.fs.rw.domain.DetectionError
 import org.fs.rw.domain.Message
 import org.fs.rw.utility.Imports._
+import org.slf4s.Logging
 
 class DetectionExecutor(
     routerDiscoverer: RouterDiscoverer,
-    detectors: Seq[Detector]) {
+    detectors: Seq[Detector]) extends Logging {
 
   def detect(username: String, password: String): Message = {
     val routerIpFork = routerDiscoverer.discoverIp()
@@ -17,6 +18,7 @@ class DetectionExecutor(
       case Right(routerIp) =>
         detectWithIp(routerIp)(username, password)
       case Left(message) =>
+        log.warn(message)
         DetectionError.of(message)
     }
   }
