@@ -2,9 +2,6 @@ name         := "router-watcher"
 version      := "1.3"
 scalaVersion := "2.11.8"
 
-EclipseKeys.withSource := true
-EclipseKeys.createSrc  := EclipseCreateSrc.Default + EclipseCreateSrc.Resource + EclipseCreateSrc.Managed
-
 resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= Seq(
