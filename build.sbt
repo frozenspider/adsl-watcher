@@ -2,6 +2,17 @@ name         := "router-watcher"
 version      := "1.3"
 scalaVersion := "2.11.8"
 
+sourceManaged            <<= baseDirectory { _ / "src_managed" }
+sourceManaged in Compile <<= baseDirectory { _ / "src_managed" / "main" / "scala" }
+sourceManaged in Test    <<= baseDirectory { _ / "src_managed" / "test" / "scala" }
+
+lazy val root = (project in file("."))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, buildInfoBuildNumber),
+    buildInfoPackage := "org.fs.rw"
+  )
+
 resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies ++= Seq(
@@ -20,10 +31,3 @@ libraryDependencies ++= Seq(
   "junit"                   %  "junit"                % "4.11"  % "test",
   "org.scalatest"           %% "scalatest"            % "2.2.4" % "test"
 )
-
-lazy val root = (project in file("."))
-  .enablePlugins(BuildInfoPlugin)
-  .settings(
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, buildInfoBuildNumber),
-    buildInfoPackage := "org.fs.rw"
-  )
