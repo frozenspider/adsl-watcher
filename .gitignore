@@ -3,12 +3,14 @@
 .settings
 .classpath
 .project
-.cache*
+.cache-*
 
 # sbt
 target/
-src-managed/
-.history
+src_managed/
+lib_managed/
+project/project/
+project/target/
 
 # Development
 /_build
@@ -18,5 +20,6 @@ buildinfo.*
 
 # Application
 application.conf
-router-watcher.log
-router-watcher.*.log*
+
+*.class
+*.log
