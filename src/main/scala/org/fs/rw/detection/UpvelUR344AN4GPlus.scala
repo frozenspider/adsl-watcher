@@ -10,17 +10,19 @@ import org.fs.rw.utility.StopWatch
 
 object UpvelUR344AN4GPlus extends Detector {
 
+  val timeoutMs = 60 * 1000
+
   val deviceInfoUri: String = "cgi-bin/status_deviceinfo.asp"
 
   override def getContent(routerIp: String,
                           username: String,
                           password: String): GetContentType = {
     val (client, cookieStore) = simpleClientWithStore()
-    val rootResponse = client.request(GET(s"http://$routerIp"))
+    val rootResponse = client.request(GET(s"http://$routerIp").addTimeout(timeoutMs))
     if (rootResponse.code != 401 || cookieStore.cookies.isEmpty) {
       None
     } else {
-      val authResponse = client.request(GET(s"http://$routerIp/$deviceInfoUri").addBasicAuth(username, password))
+      val authResponse = client.request(GET(s"http://$routerIp/$deviceInfoUri").addBasicAuth(username, password).addTimeout(timeoutMs))
       if (authResponse.code != 200) {
         Some(Left(DetectionError.of("Invalid username or password")))
       } else if (!authResponse.bodyString.contains("<TITLE>UR-344AN4G+</TITLE>")) {

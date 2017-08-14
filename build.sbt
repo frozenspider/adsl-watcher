@@ -1,5 +1,5 @@
 name         := "router-watcher"
-version      := "1.3"
+version      := "1.3.1"
 scalaVersion := "2.11.8"
 
 sourceManaged            <<= baseDirectory { _ / "src_managed" }
@@ -23,11 +23,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick"      %% "slick"                % "3.1.0",
   "mysql"                   %  "mysql-connector-java" % "5.1.36",
   // Other
-  "com.github.frozenspider" %% "fs-web-utils"         % "0.5",
+  "com.github.frozenspider" %% "fs-web-utils"         % "0.5.1",
   "org.apache.commons"      %  "commons-lang3"        % "3.4",
   "com.github.nscala-time"  %  "nscala-time_2.11"     % "2.2.0",
   "com.typesafe"            %  "config"               % "1.3.0",
   // Test
-  "junit"                   %  "junit"                % "4.11"  % "test",
+  "junit"                   %  "junit"                % "4.12"  % "test",
   "org.scalatest"           %% "scalatest"            % "2.2.4" % "test"
 )
