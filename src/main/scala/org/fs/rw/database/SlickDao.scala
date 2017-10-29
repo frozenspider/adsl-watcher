@@ -156,7 +156,7 @@ class SlickDao(config: Config) extends Dao with Logging {
         // Error counters
         //
         unavailableSecondsOption
-      ) <> (RouterInfo.tupled(_), RouterInfo.unapply(_))
+      ) <> (RouterInfo.tupled, RouterInfo.unapply)
     }
 
     class DetectionErrors(tag: Tag) extends Table[DetectionError](tag, "errors") {

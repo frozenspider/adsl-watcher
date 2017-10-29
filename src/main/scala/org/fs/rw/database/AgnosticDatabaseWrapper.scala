@@ -2,8 +2,6 @@ package org.fs.rw.database
 
 import com.typesafe.config.Config
 
-import com.typesafe.config.ConfigFactory
-
 import slick.driver.H2Driver
 import slick.driver.JdbcDriver
 import slick.driver.MySQLDriver

@@ -6,8 +6,8 @@ import org.fs.rw.database.SlickDao
 import org.fs.rw.detection._
 import org.slf4s.Logging
 
-import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 
 object RouterWatcherMain extends App with Logging {
 

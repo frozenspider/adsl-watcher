@@ -79,7 +79,7 @@ object UpvelUR344AN4GPlus extends Detector {
         ),
         //
         // Error counters
-        //,
+        //
         unavailableSecondsOption = parseSecondsOption(tableStateCellsText(46))
       )
     }

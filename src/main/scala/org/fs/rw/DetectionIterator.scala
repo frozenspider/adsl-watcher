@@ -3,7 +3,6 @@ package org.fs.rw
 import java.lang.Thread.UncaughtExceptionHandler
 
 import org.fs.rw.database.Dao
-import org.fs.rw.utility.Imports._
 import org.fs.utility.StopWatch
 import org.slf4s.Logging
 
@@ -11,9 +10,10 @@ import com.typesafe.config.Config
 
 class DetectionIterator(
   routerDiscoverer: RouterDiscoverer,
-  executor: DetectionExecutor,
-  dao: Dao,
-  config: Config)
+  executor:         DetectionExecutor,
+  dao:              Dao,
+  config:           Config
+)
     extends Logging {
 
   var threadOption: Option[Thread] = None
