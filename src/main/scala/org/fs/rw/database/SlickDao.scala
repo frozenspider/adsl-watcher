@@ -1,6 +1,8 @@
 package org.fs.rw.database
 
 import org.fs.rw.domain._
+import org.fs.utility.StopWatch
+import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
 import org.slf4s.Logging
 
@@ -20,12 +22,16 @@ class SlickDao(config: Config) extends Dao with Logging {
   private val detectionErrors = TableQuery[DetectionErrors]
 
   override def setup(): Unit = {
-    if (MTable.getTables.exec().isEmpty) {
-      (routerInfoRecords.schema ++ detectionErrors.schema).create.exec()
-      log.info("Schema initialized")
-    } else {
-      log.info("Schema exists")
-    }
+    log.info("Running migrations")
+    StopWatch.measureAndCall({
+      val flyway = new Flyway
+      val source = database.source.asInstanceOf[slick.jdbc.DataSourceJdbcDataSource]
+      flyway.setDataSource(source.ds)
+      flyway.setBaselineVersionAsString("1")
+      // If schema exists - mark it with a baseline version "1"
+      flyway.setBaselineOnMigrate(true)
+      flyway.migrate()
+    })((_, t) => log.info(s"Done in $t ms"))
   }
 
   override def saveMessage(message: Message): Unit = {
@@ -144,7 +150,7 @@ class SlickDao(config: Config) extends Dao with Logging {
           upstreamDataRateOption,
           upstreamCrcErrorsOption,
           upstreamErroredSecondsOption,
-          upstreamSeverelyErroredSecondsOption,
+          upstreamSeverelyErroredSecondsOption
         ),
         //
         // Error counters

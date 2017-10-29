@@ -7,7 +7,7 @@ import org.fs.rw.domain.Modulation
 import org.fs.rw.domain.RouterInfo
 import org.fs.rw.domain.RouterStream
 import org.fs.rw.utility.Imports._
-import org.fs.rw.utility.StopWatch
+import org.fs.utility.StopWatch
 
 object UpvelUR344AN4GPlus extends Detector {
 

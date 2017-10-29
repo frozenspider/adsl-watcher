@@ -22,7 +22,9 @@ libraryDependencies ++= Seq(
   // Database
   "com.typesafe.slick"      %% "slick"                % "3.2.1",
   "mysql"                   %  "mysql-connector-java" % "5.1.36",
+  "org.flywaydb"            %  "flyway-core"          % "4.2.0",
   // Other
+  "com.github.frozenspider" %% "fs-common-utils"      % "0.1.3",
   "com.github.frozenspider" %% "fs-web-utils"         % "0.5.3",
   "org.apache.commons"      %  "commons-lang3"        % "3.4",
   "com.github.nscala-time"  %% "nscala-time"          % "2.16.0",

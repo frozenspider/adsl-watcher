@@ -9,7 +9,7 @@ import slick.driver.JdbcDriver
 import slick.driver.MySQLDriver
 
 class AgnosticDatabaseWrapper(dbKey: String, config: Config) {
-  private lazy val driverName = config.getString(s"$dbKey.driver")
+  lazy val driverName = config.getString(s"$dbKey.driver")
 
   lazy val profile: JdbcDriver = {
     driverName match {
