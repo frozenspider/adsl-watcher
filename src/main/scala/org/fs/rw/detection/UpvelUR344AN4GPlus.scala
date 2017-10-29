@@ -69,7 +69,14 @@ object UpvelUR344AN4GPlus extends Detector {
           erroredSecondsOption         = parseSecondsOption(tableStateCellsText(36)),
           severelyErroredSecondsOption = parseSecondsOption(tableStateCellsText(41))
         ),
-        upstream   = ???,
+        upstream   = RouterStream(
+          snrMarginOption              = parseDecibellsOption(tableStateCellsText(22)),
+          lineAttenuationOption        = parseDecibellsOption(tableStateCellsText(27)),
+          dataRateOption               = parseDataRateOption(tableStateCellsText(32)),
+          crcErrorsOption              = None,
+          erroredSecondsOption         = parseSecondsOption(tableStateCellsText(37)),
+          severelyErroredSecondsOption = parseSecondsOption(tableStateCellsText(42))
+        ),
         //
         // Error counters
         //,
