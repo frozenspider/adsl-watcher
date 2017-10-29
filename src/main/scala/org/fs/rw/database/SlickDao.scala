@@ -6,7 +6,6 @@ import org.slf4s.Logging
 
 import com.typesafe.config.Config
 
-import slick.dbio._
 import slick.jdbc.meta.MTable
 
 class SlickDao(config: Config) extends Dao with Logging {
@@ -44,7 +43,6 @@ class SlickDao(config: Config) extends Dao with Logging {
     database.close()
   }
 
-
   /** Action execution helper */
   private implicit class RichAction[+R](a: wrapper.api.DBIOAction[R, _ <: NoStream, _ <: Effect]) {
     import scala.concurrent._
@@ -75,6 +73,17 @@ class SlickDao(config: Config) extends Dao with Logging {
         v => AnnexMode.valueOf(v)
       )
 
+    case class RouterStreamColumns(
+      snrMarginOption:              Rep[Option[Double]],
+      lineAttenuationOption:        Rep[Option[Double]],
+      dataRateOption:               Rep[Option[Int]],
+      crcErrorsOption:              Rep[Option[Int]],
+      erroredSecondsOption:         Rep[Option[Int]],
+      severelyErroredSecondsOption: Rep[Option[Int]]
+    )
+
+    implicit object RouterStreamShape extends CaseClassShape(RouterStreamColumns.tupled, RouterStream.tupled)
+
     class RouterInfoRecords(tag: Tag) extends Table[RouterInfo](tag, "router_info_records") {
       def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
       def timestamp = column[DateTime]("timestamp")
@@ -90,15 +99,21 @@ class SlickDao(config: Config) extends Dao with Logging {
       //
       // Connection characteristics
       //
-      def snrMarginOption = column[Option[Double]]("snr_margin")
-      def lineAttenuationOption = column[Option[Double]]("line_attenuation")
-      def lineRateOption = column[Option[Int]]("line_rate")
+      def downstreamSnrMarginOption = column[Option[Double]]("downstream_snr_margin")
+      def downstreamLineAttenuationOption = column[Option[Double]]("downstream_line_attenuation")
+      def downstreamDataRateOption = column[Option[Int]]("downstream_line_rate")
+      def downstreamCrcErrorsOption = column[Option[Int]]("downstream_crc_errors")
+      def downstreamErroredSecondsOption = column[Option[Int]]("downstream_errored_seconds")
+      def downstreamSeverelyErroredSecondsOption = column[Option[Int]]("downstream_severely_errored_seconds")
+      def upstreamSnrMarginOption = column[Option[Double]]("upstream_snr_margin")
+      def upstreamLineAttenuationOption = column[Option[Double]]("upstream_line_attenuation")
+      def upstreamDataRateOption = column[Option[Int]]("upstream_line_rate")
+      def upstreamCrcErrorsOption = column[Option[Int]]("upstream_crc_errors")
+      def upstreamErroredSecondsOption = column[Option[Int]]("upstream_errored_seconds")
+      def upstreamSeverelyErroredSecondsOption = column[Option[Int]]("upstream_severely_errored_seconds")
       //
       // Error counters
       //
-      def crcErrorsOption = column[Option[Int]]("crc_errors")
-      def erroredSecondsOption = column[Option[Int]]("errored_seconds")
-      def severelyErroredSecondsOption = column[Option[Int]]("severely_errored_seconds")
       def unavailableSecondsOption = column[Option[Int]]("unavailable_seconds")
 
       def * = (
@@ -115,17 +130,27 @@ class SlickDao(config: Config) extends Dao with Logging {
         //
         // Connection characteristics
         //
-        snrMarginOption,
-        lineAttenuationOption,
-        lineRateOption,
+        RouterStreamColumns(
+          downstreamSnrMarginOption,
+          downstreamLineAttenuationOption,
+          downstreamDataRateOption,
+          downstreamCrcErrorsOption,
+          downstreamErroredSecondsOption,
+          downstreamSeverelyErroredSecondsOption
+        ),
+        RouterStreamColumns(
+          upstreamSnrMarginOption,
+          upstreamLineAttenuationOption,
+          upstreamDataRateOption,
+          upstreamCrcErrorsOption,
+          upstreamErroredSecondsOption,
+          upstreamSeverelyErroredSecondsOption,
+        ),
         //
         // Error counters
         //
-        crcErrorsOption,
-        erroredSecondsOption,
-        severelyErroredSecondsOption,
         unavailableSecondsOption
-      ) <> (RouterInfo.tupled, RouterInfo.unapply)
+      ) <> (RouterInfo.tupled(_), RouterInfo.unapply(_))
     }
 
     class DetectionErrors(tag: Tag) extends Table[DetectionError](tag, "errors") {
