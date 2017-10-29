@@ -1,5 +1,5 @@
 name         := "router-watcher"
-version      := "1.3.1"
+version      := "1.4"
 scalaVersion := "2.12.3"
 
 sourceManaged            := baseDirectory.value / "src_managed"
