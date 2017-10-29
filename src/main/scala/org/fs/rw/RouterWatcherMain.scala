@@ -6,8 +6,8 @@ import org.fs.rw.database.SlickDao
 import org.fs.rw.detection._
 import org.slf4s.Logging
 
-import com.typesafe.config.ConfigFactory
 import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 
 object RouterWatcherMain extends App with Logging {
 
@@ -22,7 +22,7 @@ object RouterWatcherMain extends App with Logging {
   )
   val routerDiscoverer: RouterDiscoverer = new RouterDiscoverer()
   val executor: org.fs.rw.DetectionExecutor = new DetectionExecutor(routerDiscoverer = routerDiscoverer, detectors = detectors)
-  val dao: org.fs.rw.database.SlickDao = new SlickDao(config = config)
+  val dao: SlickDao = new SlickDao(config = config)
   scala.sys.addShutdownHook {
     dao.tearDown()
     log.info("Shutdown complete")
@@ -30,9 +30,9 @@ object RouterWatcherMain extends App with Logging {
 
   val iterator: DetectionIterator = new DetectionIterator(
     routerDiscoverer = routerDiscoverer,
-    executor = executor,
-    dao = dao,
-    config = config
+    executor         = executor,
+    dao              = dao,
+    config           = config
   )
 
   {

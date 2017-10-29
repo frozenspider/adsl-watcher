@@ -9,18 +9,20 @@ class RouterDiscoverer {
         Left(s"Unsupported OS: $v")
     }
 
+  private val netstatCmd = "netstat -rn"
+
   private def isNonSeparatorLine(s: String) = !s.startsWith("=====")
 
   private def executeNetstat(): String = {
     import scala.sys.process._
-    "netstat -rn".!!
+    netstatCmd.!!
   }
 
   private def discoverForWindows(): Either[String, String] = {
     val netstatOutput = executeNetstat()
     val lines = netstatOutput.lines.toList
     if (lines.size < 0 || !lines.head.startsWith("=====")) {
-      Left("Unexpected output format of 'netstat -rn'")
+      Left(s"Unexpected output format of '$netstatCmd'")
     } else {
       val linesParts = lines
         .drop(1).dropWhile(isNonSeparatorLine)
@@ -31,10 +33,10 @@ class RouterDiscoverer {
         if (parts.size == 5) {
           Right(parts(2))
         } else {
-          Left("Unexpected format of IPs for 'netstat -rn'")
+          Left(s"Unexpected format of IPs for '$netstatCmd'")
         }
       } getOrElse {
-        Left("Can't find the router address, possibly Windows network connection offline")
+        Left(s"Can't find the router address through '$netstatCmd', possibly Windows network connection offline")
       }
     }
   }

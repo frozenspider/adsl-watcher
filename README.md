@@ -1,5 +1,5 @@
-RouterWatcher
-============
+router-watcher
+==============
 
 Watches the router status, logging connection details to a database.
 Supports only my personal router model (Upvel UR344AN4G+), but extensible framework support is implemented.
