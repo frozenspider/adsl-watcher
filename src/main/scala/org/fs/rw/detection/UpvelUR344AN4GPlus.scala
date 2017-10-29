@@ -5,8 +5,9 @@ import org.fs.rw.domain.DetectionError
 import org.fs.rw.domain.Message
 import org.fs.rw.domain.Modulation
 import org.fs.rw.domain.RouterInfo
+import org.fs.rw.domain.RouterStream
 import org.fs.rw.utility.Imports._
-import org.fs.rw.utility.StopWatch
+import org.fs.utility.StopWatch
 
 object UpvelUR344AN4GPlus extends Detector {
 
@@ -14,9 +15,11 @@ object UpvelUR344AN4GPlus extends Detector {
 
   val deviceInfoUri: String = "cgi-bin/status_deviceinfo.asp"
 
-  override def getContent(routerIp: String,
-                          username: String,
-                          password: String): GetContentType = {
+  override def getContent(
+      routerIp: String,
+      username: String,
+      password: String
+  ): GetContentType = {
     val (client, cookieStore) = simpleClientWithStore()
     val rootResponse = client.request(GET(s"http://$routerIp").addTimeout(timeoutMs))
     if (rootResponse.code != 401 || cookieStore.cookies.isEmpty) {
@@ -46,27 +49,37 @@ object UpvelUR344AN4GPlus extends Detector {
         parseServerIpOption((statusBlock(statusIdx + 7) \ "table" \ "tr" \ "td")(0).trimmedText)
       }
       RouterInfo(
-        timestamp = DateTime.now,
+        timestamp      = DateTime.now,
         firmwareOption = Some(tableStateCellsText(2)),
         //
         // Connection state
         //
-        lineUpOption = Some(tableStateCellsText(5) == "up"),
-        serverIpOption = serverIpOption,
+        lineUpOption     = Some(tableStateCellsText(5) == "up"),
+        serverIpOption   = serverIpOption,
         modulationOption = parseModulationOption(tableStateCellsText(8)),
-        annexModeOption = parseAnnexOption(tableStateCellsText(11)),
+        annexModeOption  = parseAnnexOption(tableStateCellsText(11)),
         //
         // Connection characteristics
         //
-        snrMarginOption = parseDecibellsOption(tableStateCellsText(21)),
-        lineAttenuationOption = parseDecibellsOption(tableStateCellsText(26)),
-        lineRateOption = parseDataRateOption(tableStateCellsText(31)),
+        downstream = RouterStream(
+          snrMarginOption              = parseDecibellsOption(tableStateCellsText(21)),
+          lineAttenuationOption        = parseDecibellsOption(tableStateCellsText(26)),
+          dataRateOption               = parseDataRateOption(tableStateCellsText(31)),
+          crcErrorsOption              = None,
+          erroredSecondsOption         = parseSecondsOption(tableStateCellsText(36)),
+          severelyErroredSecondsOption = parseSecondsOption(tableStateCellsText(41))
+        ),
+        upstream   = RouterStream(
+          snrMarginOption              = parseDecibellsOption(tableStateCellsText(22)),
+          lineAttenuationOption        = parseDecibellsOption(tableStateCellsText(27)),
+          dataRateOption               = parseDataRateOption(tableStateCellsText(32)),
+          crcErrorsOption              = None,
+          erroredSecondsOption         = parseSecondsOption(tableStateCellsText(37)),
+          severelyErroredSecondsOption = parseSecondsOption(tableStateCellsText(42))
+        ),
         //
         // Error counters
         //
-        crcErrorsOption = None,
-        erroredSecondsOption = parseSecondsOption(tableStateCellsText(36)),
-        severelyErroredSecondsOption = parseSecondsOption(tableStateCellsText(41)),
         unavailableSecondsOption = parseSecondsOption(tableStateCellsText(46))
       )
     }
