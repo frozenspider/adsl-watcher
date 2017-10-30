@@ -1,6 +1,7 @@
 package org.fs.rw.database
 
 import org.fs.rw.domain._
+import org.fs.rw.utility.Imports._
 import org.fs.utility.StopWatch
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
@@ -9,6 +10,7 @@ import org.slf4s.Logging
 import com.typesafe.config.Config
 
 import slick.jdbc.meta.MTable
+import scala.annotation.tailrec
 
 class SlickDao(config: Config) extends Dao with Logging {
 
@@ -45,17 +47,78 @@ class SlickDao(config: Config) extends Dao with Logging {
     log.debug("Message saved")
   }
 
+  override def thinOut(cutoffTimeMs: Long, intendedGapMs: Long): Unit = {
+    // Code below is fragile and far from being typesafe
+    val cutoffTimeMcs = BigInt(cutoffTimeMs) * 1000
+    val intendedGapMcs = BigInt(intendedGapMs) * 1000
+    // Select minimal ID or a close proximity record
+    for {
+      tableName <- Seq(routerInfoRecords, detectionErrors).map(_.baseTableRow.tableName)
+    } {
+      val minIdSql: DBIO[Seq[Option[Long]]] = sql"""
+        |SELECT MIN(t.id) as min_id FROM (
+        |  SELECT
+        |    curr.id,
+        |    curr.timestamp AS curr_ts,
+        |    prev.timestamp AS prev_ts,
+        |    TIMESTAMPDIFF(MICROSECOND, prev.timestamp, curr.timestamp) AS diff
+        |  FROM `#${tableName}` curr
+        |  INNER JOIN `#${tableName}` prev ON prev.id = curr.id - 1
+        |  WHERE TIMESTAMPDIFF(MICROSECOND, curr.timestamp, NOW()) > #${cutoffTimeMcs.toString}
+        |  HAVING diff BETWEEN 1 AND #${(intendedGapMcs / 2).toString}
+        |) t
+        """.stripMargin.as[Option[Long]]
+      val minIdSeq = minIdSql.exec().flatten
+      minIdSeq.headOption match {
+        case Some(minId) if minId > 0 =>
+          // Programmatically scroll through the records, copying IDs to remove
+          // Start one record earlier than minId to use it as a baseline calculate
+          val listRecordsSql: DBIO[Seq[(Long, Long)]] = sql"""
+            |SELECT curr.id, UNIX_TIMESTAMP(curr.timestamp) * 1000 AS timestampMs
+            |FROM `#${tableName}` curr
+            |WHERE curr.id >= #${(minId - 1).toString}
+            |  AND TIMESTAMPDIFF(MICROSECOND, curr.timestamp, NOW()) > #${cutoffTimeMcs.toString}
+            |ORDER BY curr.id
+            """.stripMargin.as[(Long, Long)]
+          val records = listRecordsSql.exec()
+          def areTooClose(ts1: Long, ts2: Long): Boolean = {
+            math.abs(ts1 - ts2) < (intendedGapMs * 0.8)
+          }
+          @tailrec
+          def recurse(referencePoint: Long, records: Seq[(Long, Long)], acc: Seq[Long]): Seq[Long] =
+            records match {
+              case (id, timestamp) +: tail if areTooClose(timestamp, referencePoint) =>
+                recurse(referencePoint, tail, acc :+ id)
+              case (id, timestamp) +: tail =>
+                recurse(timestamp, tail, acc)
+              case _ if records.isEmpty =>
+                acc
+            }
+          val idsToRemove = recurse(records.head._2, records.tail, Seq.empty[Long])
+          if (idsToRemove.size > 500) {
+            log.info(s"Removing ${idsToRemove.size} old detailed records from ${tableName}")
+          }
+          // Remove deduced IDs
+          if (!idsToRemove.isEmpty) {
+            val removeSql = sqlu"DELETE FROM `#${tableName}` WHERE id IN (#${idsToRemove.mkString(",")})"
+            removeSql.exec()
+          }
+        case _ => // NOOP
+      }
+    }
+  }
+
   override def tearDown(): Unit = {
     database.close()
   }
 
   /** Action execution helper */
-  private implicit class RichAction[+R](a: wrapper.api.DBIOAction[R, _ <: NoStream, _ <: Effect]) {
+  private implicit class RichAction[+R](a: wrapper.api.DBIOAction[R, wrapper.api.NoStream, Nothing]) {
     import scala.concurrent._
     import scala.concurrent.duration._
 
     def exec(): R = {
-      Await.result(database.run(a), Duration(10, SECONDS))
+      Await.result(database.run(a), Duration(20, SECONDS))
     }
   }
 
@@ -90,10 +153,12 @@ class SlickDao(config: Config) extends Dao with Logging {
 
     implicit object RouterStreamShape extends CaseClassShape(RouterStreamColumns.tupled, RouterStream.tupled)
 
-    class RouterInfoRecords(tag: Tag) extends Table[RouterInfo](tag, "router_info_records") {
+    abstract class BaseTable[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
       def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
       def timestamp = column[DateTime]("timestamp")
+    }
 
+    class RouterInfoRecords(tag: Tag) extends BaseTable[RouterInfo](tag, "router_info_records") {
       def firmwareOption = column[Option[String]]("firmware")
       //
       // Connection state
@@ -159,9 +224,7 @@ class SlickDao(config: Config) extends Dao with Logging {
       ) <> (RouterInfo.tupled, RouterInfo.unapply)
     }
 
-    class DetectionErrors(tag: Tag) extends Table[DetectionError](tag, "errors") {
-      def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-      def timestamp = column[DateTime]("timestamp")
+    class DetectionErrors(tag: Tag) extends BaseTable[DetectionError](tag, "errors") {
       def message = column[String]("message")
       def * = (id.?, timestamp, message) <> ((DetectionError.apply _).tupled, DetectionError.unapply)
     }

@@ -8,6 +8,9 @@ Changelog
 ---------
 ### 1.5
 * Fixed improper autoupdate behaviour of timestamp column
+* Implemented frequent data recording, stored temporarily for recent data only
+** This allows gathering detailed statistics for the past day or so (configurable),
+with excessive data being combed out gradually as the time passes
 
 ### 1.4
 * Updated to sbt 1.0.2

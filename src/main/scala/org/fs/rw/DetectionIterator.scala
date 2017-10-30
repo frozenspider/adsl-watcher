@@ -19,9 +19,15 @@ class DetectionIterator(
   var threadOption: Option[Thread] = None
 
   def start(): Unit = {
-    val periodMs = config.getInt("period")
+    val detailedPeriodMs = config.getInt("period.detailed")
+    val longtermPeriodMs = config.getInt("period.longterm")
+    val storeDetailedForMs = config.getInt("period.storeDetailedFor")
     val username = config.getString("router.username")
     val password = config.getString("router.password")
+    require(
+      detailedPeriodMs < longtermPeriodMs / 2,
+      "Detailed period should be more than two times smaller than long-term period"
+    )
 
     log.info("Started")
     val thread = new Thread(new Runnable {
@@ -40,13 +46,14 @@ class DetectionIterator(
       }
 
       def calculateWaitTime(passedMs: Long): Long = {
-        val toWaitMs = periodMs - passedMs
+        val toWaitMs = detailedPeriodMs - passedMs
         if (toWaitMs > 0) toWaitMs else 0
       }
 
       def iteration(): Unit = {
         val message = executor.detect(username, password)
         dao.saveMessage(message)
+        dao.thinOut(storeDetailedForMs, longtermPeriodMs)
       }
     })
     thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
