@@ -7,9 +7,12 @@ Supports only my personal router model (Upvel UR344AN4G+), but extensible framew
 Changelog
 ---------
 ### 1.4
+* Updated to sbt 1.0.2
 * Updated dependencies
 * Replaced scalaj-http with fs-web-utils
 * Slight code improvements
+* Integrated Flyway for DB migrations
+* Added parsing and persisting of upstream SNR/attenuation/data rate
 
 ### 1.3
 * Updated to sbt 0.13.9
