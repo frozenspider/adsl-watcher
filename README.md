@@ -6,6 +6,9 @@ Supports only my personal router model (Upvel UR344AN4G+), but extensible framew
 
 Changelog
 ---------
+### 1.5
+* Fixed improper autoupdate behaviour of timestamp column
+
 ### 1.4
 * Updated to sbt 1.0.2
 * Updated dependencies
