@@ -51,10 +51,10 @@ class SlickDao(config: Config) extends Dao with Logging {
     // Code below is fragile and far from being typesafe
     val cutoffTimeMcs = BigInt(cutoffTimeMs) * 1000
     val intendedGapMcs = BigInt(intendedGapMs) * 1000
-    // Select minimal ID or a close proximity record
     for {
       tableName <- Seq(routerInfoRecords, detectionErrors).map(_.baseTableRow.tableName)
     } {
+      // Select minimal ID of a close proximity record
       val minIdSql: DBIO[Seq[Option[Long]]] = sql"""
         |SELECT MIN(t.id) as min_id FROM (
         |  SELECT
@@ -70,9 +70,9 @@ class SlickDao(config: Config) extends Dao with Logging {
         """.stripMargin.as[Option[Long]]
       val minIdSeq = minIdSql.exec().flatten
       minIdSeq.headOption match {
-        case Some(minId) if minId > 0 =>
-          // Programmatically scroll through the records, copying IDs to remove
-          // Start one record earlier than minId to use it as a baseline calculate
+        case Some(minId) if minId > 1 =>
+          // Programmatically scroll through the records, copying IDs for removal
+          // Start one record earlier than minId to use it as a baseline
           val listRecordsSql: DBIO[Seq[(Long, Long)]] = sql"""
             |SELECT curr.id, UNIX_TIMESTAMP(curr.timestamp) * 1000 AS timestampMs
             |FROM `#${tableName}` curr
