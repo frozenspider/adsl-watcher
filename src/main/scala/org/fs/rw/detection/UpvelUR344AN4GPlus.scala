@@ -15,18 +15,23 @@ object UpvelUR344AN4GPlus extends Detector {
 
   val deviceInfoUri: String = "cgi-bin/status_deviceinfo.asp"
 
+  val (client, cookieStore) = simpleClientWithStore()
+
   override def getContent(
       routerIp: String,
       username: String,
       password: String
   ): GetContentType = {
-    val (client, cookieStore) = simpleClientWithStore()
     val rootResponse = client.request(GET(s"http://$routerIp").addTimeout(timeoutMs))
-    if (rootResponse.code != 401 || cookieStore.cookies.isEmpty) {
+    if (cookieStore.cookies.isEmpty) {
       None
     } else {
-      val authResponse = client.request(GET(s"http://$routerIp/$deviceInfoUri").addBasicAuth(username, password).addTimeout(timeoutMs))
-      if (authResponse.code != 200) {
+      val authRequest = {
+        val req = GET(s"http://$routerIp/$deviceInfoUri").addTimeout(timeoutMs)
+        if (rootResponse.code == 200) req else req.addBasicAuth(username, password)
+      }
+      val authResponse = client.request(authRequest)
+      if (authResponse.code == 401) {
         Some(Left(DetectionError.of("Invalid username or password")))
       } else if (!authResponse.bodyString.contains("<TITLE>UR-344AN4G+</TITLE>")) {
         None
