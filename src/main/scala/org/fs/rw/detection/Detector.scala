@@ -40,8 +40,10 @@ trait Detector extends Logging {
         case ex: Throwable => Left(ex)
       }
     content match {
-      case Left(ex) =>
+      case Left(ex: IOException) =>
         Some(DetectionError.of("Failed to load content: " + ex))
+      case Left(ex) =>
+        throw ex
       case Right(None) =>
         None
       case Right(Some(Left(message))) =>
@@ -57,6 +59,12 @@ trait Detector extends Logging {
     }
   }
 
+  /**
+   * Get the router content
+   *
+   * @throws IOException indicates (somewhat expected) failure to load content
+   * @throws Exception indicates (unexpected) internal error
+   */
   def getContent(routerIp: String, username: String, password: String): GetContentType
 
   def parseContent(content: String): Message
