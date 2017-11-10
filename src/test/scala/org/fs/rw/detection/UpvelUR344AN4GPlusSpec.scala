@@ -20,7 +20,7 @@ class UpvelUR344AN4GPlusSpec
 
   // FIXME: Improve tests
   it should "parse the up state" in {
-    val content = Source.fromFile(new File(routerFolder, "up.htm")).mkString
+    val content = Source.fromFile(new File(routerFolder, "v1-up.htm")).mkString
     val parsed = instance.parseContent(content).asInstanceOf[RouterInfo]
     assert(parsed.lineUpOption === Some(true))
     assert(parsed.downstream.snrMarginOption === Some(6.8))
@@ -39,13 +39,13 @@ class UpvelUR344AN4GPlusSpec
   }
 
   it should "parse the up/disconnected state" in {
-    val content = Source.fromFile(new File(routerFolder, "up-disconnected.htm")).mkString
+    val content = Source.fromFile(new File(routerFolder, "v1-up-disconnected.htm")).mkString
     val parsed = instance.parseContent(content).asInstanceOf[RouterInfo]
     assert(parsed.lineUpOption === Some(true))
   }
 
   it should "parse the wait-for-init state" in {
-    val content = Source.fromFile(new File(routerFolder, "wait-for-init.htm")).mkString
+    val content = Source.fromFile(new File(routerFolder, "v1-wait-for-init.htm")).mkString
     val parsed = instance.parseContent(content).asInstanceOf[RouterInfo]
     assert(parsed.lineUpOption === Some(false))
     assert(parsed.downstream.snrMarginOption === None)
