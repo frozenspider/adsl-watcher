@@ -24,6 +24,7 @@ class DetectionIterator(
     val storeDetailedForMs = config.getInt("period.storeDetailedFor")
     val username = config.getString("router.username")
     val password = config.getString("router.password")
+    val interface = config.getString("router.interface")
     require(
       detailedPeriodMs < longtermPeriodMs / 2,
       "Detailed period should be more than two times smaller than long-term period"
@@ -51,7 +52,7 @@ class DetectionIterator(
       }
 
       def iteration(): Unit = {
-        val message = executor.detect(username, password)
+        val message = executor.detect(username, password, interface)
         dao.saveMessage(message)
         dao.thinOut(storeDetailedForMs, longtermPeriodMs)
       }

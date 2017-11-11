@@ -12,21 +12,21 @@ class DetectionExecutor(
   detectors:        Seq[Detector]
 ) extends Logging {
 
-  def detect(username: String, password: String): Message = {
+  def detect(username: String, password: String, interface: String): Message = {
     val routerIpFork = routerDiscoverer.discoverIp()
     routerIpFork match {
       case Right(routerIp) =>
-        detectWithIp(routerIp)(username, password)
+        detectWithIp(routerIp)(username, password, interface)
       case Left(message) =>
         log.warn(message)
         DetectionError.of(message)
     }
   }
 
-  private def detectWithIp(routerIp: String)(username: String, password: String): Message = {
+  private def detectWithIp(routerIp: String)(username: String, password: String, interface: String): Message = {
     try {
       detectors.toStream.flatMap(d =>
-        d.detect(routerIp, username, password)).headOption getOrElse {
+        d.detect(routerIp, username, password, interface)).headOption getOrElse {
         DetectionError.of("Unknown router type")
       }
     } catch {

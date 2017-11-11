@@ -28,16 +28,18 @@ object UpvelUR344AN4GPlus extends Detector {
   val (client, cookieStore) = simpleClientWithStore()
 
   override def getContent(
-      routerIp: String,
-      username: String,
-      password: String
+      routerIp:  String,
+      username:  String,
+      password:  String,
+      interface: String
   ): GetContentType = {
     val rootResponse = client.request(GET(s"http://$routerIp").addTimeout(timeoutMs))
     if (cookieStore.cookies.isEmpty) {
       None
     } else {
       val authRequest = {
-        val req = GET(s"http://$routerIp/$deviceInfoUri").addTimeout(timeoutMs)
+        // Funny thing is... router doesn't actually care about auth. Well fkin played, Upvel.
+        val req = POST(s"http://$routerIp/$deviceInfoUri").addParameter("DvInfo_PVC", interface).addTimeout(timeoutMs)
         if (rootResponse.code == 200) req else req.addBasicAuth(username, password)
       }
       val authResponse = client.request(authRequest)

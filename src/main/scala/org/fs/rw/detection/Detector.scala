@@ -32,10 +32,10 @@ trait Detector extends Logging {
   type GetContentType = Option[Either[Message, String]]
 
   /** Detect a router connection values, returning None if router model belong to this detector */
-  def detect(routerIp: String, username: String, password: String): Option[Message] = {
+  def detect(routerIp: String, username: String, password: String, interface: String): Option[Message] = {
     val content: Either[Throwable, GetContentType] =
       try {
-        Right(getContent(routerIp, username, password))
+        Right(getContent(routerIp, username, password, interface))
       } catch {
         case ex: Throwable => Left(ex)
       }
@@ -65,7 +65,7 @@ trait Detector extends Logging {
    * @throws IOException indicates (somewhat expected) failure to load content
    * @throws Exception indicates (unexpected) internal error
    */
-  def getContent(routerIp: String, username: String, password: String): GetContentType
+  def getContent(routerIp: String, username: String, password: String, interface: String): GetContentType
 
   def parseContent(content: String): Message
 

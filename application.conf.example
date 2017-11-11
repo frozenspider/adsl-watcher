@@ -16,4 +16,5 @@ period = {
 router = {
   username = "admin"
   password = "admin"
+  interface = "0" // Exact meaning of this setting is router-specific
 }
