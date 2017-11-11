@@ -10,9 +10,12 @@ Changelog
 * Fixed improper autoupdate behaviour of timestamp column
 * Implemented frequent data recording, stored temporarily for recent data only
   * This allows gathering detailed statistics for the past day or so (configurable),
-with excessive data being combed out gradually as the time passes
-* Upvel UR344AN4G+ detector now reuses the same session after initial login if possible
-  * This fixes spamming log with `2017-10-31 14:15:20 [Informational] WEB: WEB user <admin> login`
+     with excessive data being combed out gradually as the time passes
+  * Cleanup isn't working properly yet!
+* Tweaks to Upvel UR344AN4G+ detector
+  * It now reuses the same session after initial login if possible, fixing spamming log
+    with `2017-10-31 14:15:20 [Informational] WEB: WEB user <admin> login`
+  * Support for firmware v1.782
 
 ### 1.4
 * Updated to sbt 1.0.2
