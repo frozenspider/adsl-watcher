@@ -37,11 +37,12 @@ object UpvelUR344AN4GPlus extends Detector {
     if (cookieStore.cookies.isEmpty) {
       None
     } else {
-      val authRequest = {
-        // Funny thing is... router doesn't actually care about auth. Well fkin played, Upvel.
-        val req = POST(s"http://$routerIp/$deviceInfoUri").addParameter("DvInfo_PVC", interface).addTimeout(timeoutMs)
-        if (rootResponse.code == 200) req else req.addBasicAuth(username, password)
+      if (rootResponse.code != 200) {
+        // Make sure that auth is cached in cookies
+        client.request(GET(s"http://$routerIp").addBasicAuth(username, password).addTimeout(timeoutMs))
       }
+      // Funny thing is... router doesn't actually care about auth. Well fkin played, Upvel.
+      val authRequest = POST(s"http://$routerIp/$deviceInfoUri").addParameter("DvInfo_PVC", interface).addTimeout(timeoutMs)
       val authResponse = client.request(authRequest)
       if (authResponse.code == 401) {
         Some(Left(DetectionError.of("Invalid username or password")))
