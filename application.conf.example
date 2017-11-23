@@ -8,9 +8,7 @@ db = {
 }
 
 period = {
-  detailed = 15000 // 15 seconds
   longterm = 600000 // 10 minutes
-  storeDetailedFor = 86400000 // 24 hours
 }
 
 router = {
