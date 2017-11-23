@@ -47,6 +47,67 @@ class SlickDao(config: Config) extends Dao with Logging {
     log.debug("Message saved")
   }
 
+  override def thinOut(cutoffTimeMs: Long, intendedGapMs: Long): Unit = {
+    // Code below is fragile and far from being typesafe
+    val cutoffTimeMcs = BigInt(cutoffTimeMs) * 1000
+    val intendedGapMcs = BigInt(intendedGapMs) * 1000
+    for {
+      tableName <- Seq(routerInfoRecords, detectionErrors).map(_.baseTableRow.tableName)
+    } {
+      // Select minimal ID of a close proximity record
+      val minIdSql: DBIO[Seq[Option[Long]]] = sql"""
+        |SELECT MIN(t.id) as min_id FROM (
+        |  SELECT
+        |    curr.id,
+        |    curr.timestamp AS curr_ts,
+        |    prev.timestamp AS prev_ts,
+        |    TIMESTAMPDIFF(MICROSECOND, prev.timestamp, curr.timestamp) AS diff
+        |  FROM `#${tableName}` curr
+        |  INNER JOIN `#${tableName}` prev ON prev.id = curr.id - 1
+        |  WHERE TIMESTAMPDIFF(MICROSECOND, curr.timestamp, NOW()) > #${cutoffTimeMcs.toString}
+        |  HAVING diff BETWEEN 1 AND #${(intendedGapMcs / 2).toString}
+        |) t
+        """.stripMargin.as[Option[Long]]
+      val minIdSeq = minIdSql.exec().flatten
+      minIdSeq.headOption match {
+        case Some(minId) if minId > 1 =>
+          // Programmatically scroll through the records, copying IDs for removal
+          // Start one record earlier than minId to use it as a baseline
+          val listRecordsSql: DBIO[Seq[(Long, Long)]] = sql"""
+            |SELECT curr.id, UNIX_TIMESTAMP(curr.timestamp) * 1000 AS timestampMs
+            |FROM `#${tableName}` curr
+            |WHERE curr.id >= #${(minId - 1).toString}
+            |  AND TIMESTAMPDIFF(MICROSECOND, curr.timestamp, NOW()) > #${cutoffTimeMcs.toString}
+            |ORDER BY curr.id
+            """.stripMargin.as[(Long, Long)]
+          val records = listRecordsSql.exec()
+          def areTooClose(ts1: Long, ts2: Long): Boolean = {
+            math.abs(ts1 - ts2) < (intendedGapMs * 0.8)
+          }
+          @tailrec
+          def recurse(referencePoint: Long, records: Seq[(Long, Long)], acc: Seq[Long]): Seq[Long] =
+            records match {
+              case (id, timestamp) +: tail if areTooClose(timestamp, referencePoint) =>
+                recurse(referencePoint, tail, acc :+ id)
+              case (id, timestamp) +: tail =>
+                recurse(timestamp, tail, acc)
+              case _ if records.isEmpty =>
+                acc
+            }
+          val idsToRemove = recurse(records.head._2, records.tail, Seq.empty[Long])
+          if (idsToRemove.size > 500) {
+            log.info(s"Removing ${idsToRemove.size} old detailed records from ${tableName}")
+          }
+          // Remove deduced IDs
+          if (!idsToRemove.isEmpty) {
+            val removeSql = sqlu"DELETE FROM `#${tableName}` WHERE id IN (#${idsToRemove.mkString(",")})"
+            removeSql.exec()
+          }
+        case _ => // NOOP
+      }
+    }
+  }
+
   override def tearDown(): Unit = {
     database.close()
   }
