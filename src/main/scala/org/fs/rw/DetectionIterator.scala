@@ -19,9 +19,10 @@ class DetectionIterator(
   var threadOption: Option[Thread] = None
 
   def start(): Unit = {
-    val periodMs = config.getInt("period")
+    val longtermPeriodMs = config.getInt("period.longterm")
     val username = config.getString("router.username")
     val password = config.getString("router.password")
+    val interface = config.getString("router.interface")
 
     log.info("Started")
     val thread = new Thread(new Runnable {
@@ -40,12 +41,12 @@ class DetectionIterator(
       }
 
       def calculateWaitTime(passedMs: Long): Long = {
-        val toWaitMs = periodMs - passedMs
+        val toWaitMs = longtermPeriodMs - passedMs
         if (toWaitMs > 0) toWaitMs else 0
       }
 
       def iteration(): Unit = {
-        val message = executor.detect(username, password)
+        val message = executor.detect(username, password, interface)
         dao.saveMessage(message)
       }
     })

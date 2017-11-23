@@ -1,6 +1,7 @@
 package org.fs.rw.database
 
 import org.fs.rw.domain._
+import org.fs.rw.utility.Imports._
 import org.fs.utility.StopWatch
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
@@ -9,6 +10,7 @@ import org.slf4s.Logging
 import com.typesafe.config.Config
 
 import slick.jdbc.meta.MTable
+import scala.annotation.tailrec
 
 class SlickDao(config: Config) extends Dao with Logging {
 
@@ -50,12 +52,12 @@ class SlickDao(config: Config) extends Dao with Logging {
   }
 
   /** Action execution helper */
-  private implicit class RichAction[+R](a: wrapper.api.DBIOAction[R, _ <: NoStream, _ <: Effect]) {
+  private implicit class RichAction[+R](a: wrapper.api.DBIOAction[R, wrapper.api.NoStream, Nothing]) {
     import scala.concurrent._
     import scala.concurrent.duration._
 
     def exec(): R = {
-      Await.result(database.run(a), Duration(10, SECONDS))
+      Await.result(database.run(a), Duration(20, SECONDS))
     }
   }
 
@@ -90,10 +92,12 @@ class SlickDao(config: Config) extends Dao with Logging {
 
     implicit object RouterStreamShape extends CaseClassShape(RouterStreamColumns.tupled, RouterStream.tupled)
 
-    class RouterInfoRecords(tag: Tag) extends Table[RouterInfo](tag, "router_info_records") {
+    abstract class BaseTable[T](tag: Tag, tableName: String) extends Table[T](tag, tableName) {
       def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
       def timestamp = column[DateTime]("timestamp")
+    }
 
+    class RouterInfoRecords(tag: Tag) extends BaseTable[RouterInfo](tag, "router_info_records") {
       def firmwareOption = column[Option[String]]("firmware")
       //
       // Connection state
@@ -159,9 +163,7 @@ class SlickDao(config: Config) extends Dao with Logging {
       ) <> (RouterInfo.tupled, RouterInfo.unapply)
     }
 
-    class DetectionErrors(tag: Tag) extends Table[DetectionError](tag, "errors") {
-      def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-      def timestamp = column[DateTime]("timestamp")
+    class DetectionErrors(tag: Tag) extends BaseTable[DetectionError](tag, "errors") {
       def message = column[String]("message")
       def * = (id.?, timestamp, message) <> ((DetectionError.apply _).tupled, DetectionError.unapply)
     }

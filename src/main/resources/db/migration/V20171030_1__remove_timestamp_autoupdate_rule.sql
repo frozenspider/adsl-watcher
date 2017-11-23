@@ -1,0 +1,5 @@
+ALTER TABLE `router_info_records`
+    CHANGE COLUMN `timestamp` `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `id`;
+
+ALTER TABLE `errors`
+    CHANGE COLUMN `timestamp` `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `id`;

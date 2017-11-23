@@ -7,8 +7,12 @@ db = {
   connectionPool = disabled
 }
 
-period = 600000 // 10 minutes
+period = {
+  longterm = 600000 // 10 minutes
+}
+
 router = {
   username = "admin"
   password = "admin"
+  interface = "0" // Exact meaning of this setting is router-specific
 }
