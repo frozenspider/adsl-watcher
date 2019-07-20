@@ -23,6 +23,7 @@ Changelog
 ---------
 
 ### 1.6
+* Detector for Tenda D820B
 * Removed RouterDiscoverer, IP should now be specified explicitly through config
 
 ### 1.5

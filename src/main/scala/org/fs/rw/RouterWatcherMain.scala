@@ -18,7 +18,7 @@ object RouterWatcherMain extends App with Logging {
   }
 
   val detectors: Seq[Detector] = Seq(
-    UpvelUR344AN4GPlus
+    UpvelUR344AN4GPlus, TendaD820B
   )
   val executor: org.fs.rw.DetectionExecutor = new DetectionExecutor(detectors = detectors)
   val dao: SlickDao = new SlickDao(config = config)

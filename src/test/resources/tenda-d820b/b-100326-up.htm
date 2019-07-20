@@ -1,0 +1,241 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" type="text/css" href="/hag/css/vikingTP.css">
+<title>Status Info</title>                                                                                   
+<meta http-equiv ="pragma" content="no-cache">                                        
+<script language="JavaScript" src="/hag/js/global.gsv"></script>                      
+</head>
+
+<body class="mainbody">
+<p class="pagetitle">Status Info</p>
+<p class="pagedesc">This page is used to display the device information and DSL status.</p>
+<form name="frmStatInfo" id="frmStatInfo" action="/Action" method="GET">
+<div >
+<table >
+<tr >
+<th colspan="2">Device Information</th>
+</tr>
+<tr >
+<td class="tablerowheader">S/W Version:</td>
+<td class="tablerowvalue">Tenda_EN_B_100326</td>
+</tr>
+<tr >
+<td class="tablerowheader">Serial Number:</td>
+<td class="tablerowvalue">adsl+_001</td>
+</tr>
+<tr >
+<td class="tablerowheader">DSL Version:</td>
+<td class="tablerowvalue">E.37.9.64      </td>
+</tr>
+<tr >
+<td class="tablerowheader">Operation Mode:</td>
+<td class="tablerowvalue">
+<select size="1" name="DslOperMode" onChange="" >
+<option value="10">All-AnnexM-First</option>
+<option value="7" selected>ALL</option>
+<option value="11">ADSL2Plus-AnnexM</option>
+<option value="9">ADSL2-AnnexM</option>
+<option value="8">ADSL2Plus</option>
+<option value="6">ADSL2</option>
+<option value="14">Multimode</option>
+<option value="12">G.dmt</option>
+<option value="15">T1.413</option>
+</select></td>
+<tr >
+<td class="tablerowheader">Advcapability:</td>
+<td class="tablerowvalue">annexa adsl2 adsl2plus t1413</td>
+</tr>
+<tr >
+<td class="tablerowheader">Connected Standard:</td>
+<td class="tablerowvalue">ADSL2+</td>
+</tr>
+<tr >
+<td class="tablerowheader">Profile:</td>
+<td class="tablerowvalue">Main</td>
+</tr>
+</table>
+</div>
+<div >
+<table >
+<tr >
+<th colspan="2">DSL Information</th>
+</tr>
+<tr >
+<td >
+<table >
+<tr >
+<th colspan="3">DSL Status</th>
+</tr>
+<tr >
+<td colspan="2" class="tablerowheader">Oper. Status:</td>
+<td class="tablerowvalue"><font class="textgreen">Showtime/Data</font><br><br><input type="hidden" id="id" name="id" value="0" >
+
+<select size="1" name="loopstart" onChange="" disabled>
+<option value="1" selected>Loop</option>
+</select>
+<input " name="cmdStop" id="cmdStop" value="Stop" type="submit" onClick="document.frmStatInfo.id.value ='9';"></td>
+</tr>
+<tr >
+<td colspan="2" class="tablerowheader">Last Failed Status:</td>
+<td class="tablerowvalue">0x0</td>
+</tr>
+<tr >
+<td colspan="2" class="tablerowheader">Max Line Rate(Down Stream):</td>
+<td class="tablerowvalue">3824</td>
+</tr>
+<tr >
+<td colspan="2" class="tablerowheader">Data Boost:</td>
+<td class="tablerowvalue">Disable</td>
+</tr>
+<tr >
+<th >Data Rate</th>
+<th >Up</th>
+<th >Down</th>
+</tr>
+<tr >
+<td class="tablerowheader">Speed (Kbps):</td>
+<td class="tablecolvalue">596</td>
+<td class="tablecolvalue">2044</td>
+</tr>
+<tr >
+<td class="tablerowheader">Latency:</td>
+<td class="tablecolvalue">Interleaved</td>
+<td class="tablecolvalue">Interleaved</td>
+</tr>
+<tr >
+<th >&nbsp;</th>
+<th >Local</th>
+<th >Remote</th>
+</tr>
+<tr >
+<td class="tablerowheader">Line Attenuation (dB):</td>
+<td class="tablecolvalue">22.0</td>
+<td class="tablecolvalue">10.5</td>
+</tr>
+<tr >
+<td class="tablerowheader">SNR Margin (dB):</td>
+<td class="tablecolvalue">10.5</td>
+<td class="tablecolvalue">5.5</td>
+</tr>
+<tr >
+<td class="tablerowheader">TX Power (dB):</td>
+<td class="tablecolvalue">12.1</td>
+<td class="tablecolvalue">20.3</td>
+</tr>
+<th colspan="3">SRA Parameters</th>
+<tr >
+<td colspan="2" class="tablerowheader">SRA:</td>
+<td class="tablerowvalue"><input type="radio" id="SRA" name="SRA" value="0" >
+Enable<br><input type="radio" id="SRA" name="SRA" value="2"  checked>
+Disable</td>
+</tr>
+<tr >
+<td colspan="2" class="tablerowheader">Power Management Mode:</td>
+<td class="tablerowvalue">L2, L3 Not Allowed</td>
+</tr>
+</table>
+<td >
+<table >
+<tr >
+<th colspan="1">MGMT-Counters</th>
+<th colspan="2">Local</th>
+<th colspan="2">Remote</th>
+</tr>
+<tr >
+<td class="tablerowheader">FEC:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">74702</td>
+</tr>
+<tr >
+<td class="tablerowheader">CRC:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">7604</td>
+</tr>
+<tr >
+<td class="tablerowheader">FEC Intervals:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">10570</td>
+</tr>
+<tr >
+<td class="tablerowheader">Errored Seconds:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">2490</td>
+</tr>
+<tr >
+<td class="tablerowheader">Severely ESs:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">352</td>
+</tr>
+<tr >
+<td class="tablerowheader">LOS Intervals:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">14</td>
+</tr>
+<tr >
+<td class="tablerowheader">UAV Intervals:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">5094245</td>
+</tr>
+<tr >
+<td class="tablerowheader">HEC:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">43105</td>
+</tr>
+<tr >
+<th colspan="1">TPS-TC Counters</th>
+<th colspan="2">Local</th>
+<th colspan="2">Remote</th>
+</tr>
+<tr >
+<td class="tablerowheader">CP HEC:</td>
+<td colspan="2" class="tablecolvalue">9933691</td>
+<td colspan="2" class="tablecolvalue">926435066</td>
+</tr>
+<tr >
+<td class="tablerowheader">CP UpperLayer:</td>
+<td colspan="2" class="tablecolvalue">335099</td>
+<td colspan="2" class="tablecolvalue">4131467762</td>
+</tr>
+<tr >
+<td class="tablerowheader">Bit Error:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">2209992</td>
+</tr>
+<tr >
+<th >Failures</th>
+<th colspan="2">Local</th>
+<th colspan="2">Remote</th>
+</tr>
+<tr >
+<td class="tablerowheader">NCD:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">0</td>
+</tr>
+<tr >
+<td class="tablerowheader">SEF:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">0</td>
+</tr>
+<tr >
+<td class="tablerowheader">LOS:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">0</td>
+</tr>
+<tr >
+<td class="tablerowheader">LCD:</td>
+<td colspan="2" class="tablecolvalue">0</td>
+<td colspan="2" class="tablecolvalue">0</td>
+</tr>
+</table></td>
+</tr>
+</table>
+</div>
+<div class="actionbuttons">
+<input " name="cmdSubmit" id="cmdSubmit" value="Submit" type="submit" onClick="document.frmStatInfo.id.value ='10';">&nbsp;&nbsp;&nbsp;&nbsp;
+<input  name="cmdRefresh" id="cmdRefresh" value="Refresh" type="button" onClick="self.location.reload(true);">
+</div>
+</form>
+<p class="copyright">Copyright &copy; 1999-2009 TENDA, Inc. All rights reserved.</p>
+</body>
+</html>
