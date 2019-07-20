@@ -2,7 +2,8 @@ router-watcher
 ==============
 
 Watches the router status, logging connection details to a database.
-Supports only my personal router model (Upvel UR344AN4G+), but extensible framework support is implemented.
+Supports only my personal router/modem models (Upvel UR344AN4G+, Tenda D820B),
+but extensible framework support is implemented.
 
 
 Configuration
@@ -15,10 +16,15 @@ For specific routers:
 Router name         | `interface` meaning
 ------------------- | -------------------
 Upvel UR344AN4G+    | Interface index in the dropdown, e.g. 0 for for PVC0
+Tenda D820B         | None
 
 
 Changelog
 ---------
+
+### 1.6
+* Removed RouterDiscoverer, IP should now be specified explicitly through config
+
 ### 1.5
 * Fixed improper autoupdate behaviour of timestamp column
 * Config format changes

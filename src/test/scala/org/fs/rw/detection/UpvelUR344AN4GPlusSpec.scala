@@ -94,5 +94,5 @@ class UpvelUR344AN4GPlusSpec
   }
 
   val resourcesFolder = new File("src/test/resources")
-  val routerFolder = new File(resourcesFolder, "UR-344AN4G+")
+  val routerFolder = new File(resourcesFolder, "upvel-ur-344an4g+")
 }

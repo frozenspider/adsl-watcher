@@ -12,6 +12,7 @@ period = {
 }
 
 router = {
+  host = "192.168.10.1"
   username = "admin"
   password = "admin"
   interface = "0" // Exact meaning of this setting is router-specific
