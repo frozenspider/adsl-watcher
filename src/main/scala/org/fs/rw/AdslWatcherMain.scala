@@ -9,7 +9,7 @@ import org.slf4s.Logging
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
-object RouterWatcherMain extends App with Logging {
+object AdslWatcherMain extends App with Logging {
 
   val config: Config = ConfigFactory.parseFileAnySyntax(new File("application.conf"))
   if (!config.hasPath("device")) {
