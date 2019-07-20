@@ -9,19 +9,18 @@ import org.slf4s.Logging
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
-object RouterWatcherMain extends App with Logging {
+object AdslWatcherMain extends App with Logging {
 
   val config: Config = ConfigFactory.parseFileAnySyntax(new File("application.conf"))
-  if (!config.hasPath("router")) {
+  if (!config.hasPath("device")) {
     log.error("Config file not found or is invalid")
     scala.sys.exit(1)
   }
 
   val detectors: Seq[Detector] = Seq(
-    UpvelUR344AN4GPlus
+    UpvelUR344AN4GPlus, TendaD820B
   )
-  val routerDiscoverer: RouterDiscoverer = new RouterDiscoverer()
-  val executor: org.fs.rw.DetectionExecutor = new DetectionExecutor(routerDiscoverer = routerDiscoverer, detectors = detectors)
+  val executor: org.fs.rw.DetectionExecutor = new DetectionExecutor(detectors = detectors)
   val dao: SlickDao = new SlickDao(config = config)
   scala.sys.addShutdownHook {
     dao.tearDown()
@@ -29,10 +28,9 @@ object RouterWatcherMain extends App with Logging {
   }
 
   val iterator: DetectionIterator = new DetectionIterator(
-    routerDiscoverer = routerDiscoverer,
-    executor         = executor,
-    dao              = dao,
-    config           = config
+    executor = executor,
+    dao      = dao,
+    config   = config
   )
 
   {

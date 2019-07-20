@@ -9,20 +9,20 @@ import org.slf4s.Logging
 import com.typesafe.config.Config
 
 class DetectionIterator(
-  routerDiscoverer: RouterDiscoverer,
-  executor:         DetectionExecutor,
-  dao:              Dao,
-  config:           Config
+  executor: DetectionExecutor,
+  dao:      Dao,
+  config:   Config
 )
-    extends Logging {
+  extends Logging {
 
   var threadOption: Option[Thread] = None
 
   def start(): Unit = {
     val longtermPeriodMs = config.getInt("period.longterm")
-    val username = config.getString("router.username")
-    val password = config.getString("router.password")
-    val interface = config.getString("router.interface")
+    val host = config.getString("device.host")
+    val username = config.getString("device.username")
+    val password = config.getString("device.password")
+    val interface = config.getString("device.interface")
 
     log.info("Started")
     val thread = new Thread(new Runnable {
@@ -46,7 +46,7 @@ class DetectionIterator(
       }
 
       def iteration(): Unit = {
-        val message = executor.detect(username, password, interface)
+        val message = executor.detect(host, username, password, interface)
         dao.saveMessage(message)
       }
     })

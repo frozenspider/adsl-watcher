@@ -1,5 +1,5 @@
 db = {
-  url = "jdbc:mysql://localhost:3306/router_watcher"
+  url = "jdbc:mysql://localhost:3306/adsl_watcher"
   driver = com.mysql.jdbc.Driver
   user = "root"
   password = ""
@@ -11,8 +11,9 @@ period = {
   longterm = 600000 // 10 minutes
 }
 
-router = {
+device = {
+  host = "192.168.10.1"
   username = "admin"
   password = "admin"
-  interface = "0" // Exact meaning of this setting is router-specific
+  interface = "0" // Exact meaning of this setting is modem-specific
 }

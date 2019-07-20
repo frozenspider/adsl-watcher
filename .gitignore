@@ -15,7 +15,7 @@ project/target/
 # Development
 /_build
 _assemble.*
-router-watcher-*.jar
+adsl-watcher-*.jar
 buildinfo.*
 
 # Application
