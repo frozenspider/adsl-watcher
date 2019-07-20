@@ -1,8 +1,8 @@
-router-watcher
+adsl-watcher
 ==============
 
-Watches the router status, logging connection details to a database.
-Supports only my personal router/modem models (Upvel UR344AN4G+, Tenda D820B),
+Watches the ADSL modem/router status, logging connection details to a database.
+Supports only my personal modem and router models (Upvel UR344AN4G+, Tenda D820B),
 but extensible framework support is implemented.
 
 
@@ -10,10 +10,10 @@ Configuration
 -------------
 You'll need to copy `application.conf.example` as `application.conf`, changing values according to your own setup.
 
-`router.interface` setting controls which router interface the router-watcher should query.
-For specific routers:
+`device.interface` setting controls which modem interface the adsl-watcher should query.
+For specific devices:
 
-Router name         | `interface` meaning
+Device name         | `interface` meaning
 ------------------- | -------------------
 Upvel UR344AN4G+    | Interface index in the dropdown, e.g. 0 for for PVC0
 Tenda D820B         | None
@@ -23,6 +23,7 @@ Changelog
 ---------
 
 ### 1.6
+* Renamed project from `router-watcher` to `adsl-watcher`
 * Detector for Tenda D820B
 * Removed RouterDiscoverer, IP should now be specified explicitly through config
 

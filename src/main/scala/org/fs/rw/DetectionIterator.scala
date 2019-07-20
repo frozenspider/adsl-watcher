@@ -19,10 +19,10 @@ class DetectionIterator(
 
   def start(): Unit = {
     val longtermPeriodMs = config.getInt("period.longterm")
-    val ip = config.getString("router.ip")
-    val username = config.getString("router.username")
-    val password = config.getString("router.password")
-    val interface = config.getString("router.interface")
+    val ip = config.getString("device.ip")
+    val username = config.getString("device.username")
+    val password = config.getString("device.password")
+    val interface = config.getString("device.interface")
 
     log.info("Started")
     val thread = new Thread(new Runnable {

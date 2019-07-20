@@ -12,31 +12,31 @@ class DetectionExecutor(
   detectors: Seq[Detector]
 ) extends Logging {
 
-  def detect(routerIp: String, username: String, password: String, interface: String): Message = {
+  def detect(deviceIp: String, username: String, password: String, interface: String): Message = {
     val routerIpErrorOption: Option[String] =
-      if (!InetAddressUtils.isIPv4Address(routerIp)) {
-        Some(s"$routerIp is not a valid IPv4 address")
+      if (!InetAddressUtils.isIPv4Address(deviceIp)) {
+        Some(s"$deviceIp is not a valid IPv4 address")
       } else {
         None
       }
     routerIpErrorOption match {
       case None =>
-        detectWithIp(routerIp)(username, password, interface)
+        detectWithIp(deviceIp)(username, password, interface)
       case Some(message) =>
         log.warn(message)
         DetectionError.of(message)
     }
   }
 
-  private def detectWithIp(routerIp: String)(username: String, password: String, interface: String): Message = {
+  private def detectWithIp(deviceIp: String)(username: String, password: String, interface: String): Message = {
     try {
       detectors.toStream.flatMap(d =>
-        d.detect(routerIp, username, password, interface)).headOption getOrElse {
-        DetectionError.of("Unknown router type")
+        d.detect(deviceIp, username, password, interface)).headOption getOrElse {
+        DetectionError.of("Unknown device type")
       }
     } catch {
       case ex: SocketTimeoutException =>
-        DetectionError.of("Router query timeout")
+        DetectionError.of("Device query timeout")
     }
   }
 }

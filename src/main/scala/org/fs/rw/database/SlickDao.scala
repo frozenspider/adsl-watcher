@@ -97,7 +97,7 @@ class SlickDao(config: Config) extends Dao with Logging {
       def timestamp = column[DateTime]("timestamp")
     }
 
-    class RouterInfoRecords(tag: Tag) extends BaseTable[RouterInfo](tag, "router_info_records") {
+    class RouterInfoRecords(tag: Tag) extends BaseTable[RouterInfo](tag, "device_info_records") {
       def firmwareOption = column[Option[String]]("firmware")
       //
       // Connection state

@@ -12,7 +12,7 @@ import com.typesafe.config.ConfigFactory
 object RouterWatcherMain extends App with Logging {
 
   val config: Config = ConfigFactory.parseFileAnySyntax(new File("application.conf"))
-  if (!config.hasPath("router")) {
+  if (!config.hasPath("device")) {
     log.error("Config file not found or is invalid")
     scala.sys.exit(1)
   }

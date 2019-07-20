@@ -1,4 +1,4 @@
-name         := "router-watcher"
+name         := "adsl-watcher"
 version      := "1.5"
 scalaVersion := "2.12.3"
 
