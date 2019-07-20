@@ -15,7 +15,8 @@ import org.fs.utility.StopWatch
 object TendaD820B extends Detector {
   val timeoutMs = 60 * 1000
 
-  val deviceInfoUri: String = "MainPage?id=10"
+  val deviceInfoUri = "MainPage?id=10"
+  val stringToBePresent = "TENDA, Inc. All rights reserved."
 
   val (client, cookieStore) = simpleClientWithStore()
 
@@ -25,23 +26,18 @@ object TendaD820B extends Detector {
     password:  String,
     interface: String
   ): GetContentType = {
-    val rootResponse = client.request(GET(s"http://$routerIp").addTimeout(timeoutMs))
-    if (cookieStore.cookies.isEmpty) {
+    val url = s"http://$routerIp/$deviceInfoUri"
+    val initialResponse = client.request(GET(url).addTimeout(timeoutMs))
+    if (initialResponse.code != 401) {
       None
     } else {
-      if (rootResponse.code != 200) {
-        // Make sure that auth is cached in cookies
-        client.request(GET(s"http://$routerIp").addBasicAuth(username, password).addTimeout(timeoutMs))
-      }
-      // Funny thing is... router doesn't actually care about auth. Well fkin played, Upvel.
-      val authRequest = POST(s"http://$routerIp/$deviceInfoUri").addParameter("DvInfo_PVC", interface).addTimeout(timeoutMs)
-      val authResponse = client.request(authRequest)
-      if (authResponse.code == 401) {
+      val dataResponse = client.request(GET(url).addBasicAuth(username, password).addTimeout(timeoutMs))
+      if (dataResponse.code == 401) {
         Some(Left(DetectionError.of("Invalid username or password")))
-      } else if (!authResponse.bodyString.contains("<TITLE>UR-344AN4G+</TITLE>")) {
+      } else if (!dataResponse.bodyString.contains(stringToBePresent)) {
         None
       } else {
-        Some(Right(authResponse.bodyString))
+        Some(Right(dataResponse.bodyString))
       }
     }
   }
