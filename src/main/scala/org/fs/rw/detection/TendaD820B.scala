@@ -26,19 +26,13 @@ object TendaD820B extends Detector {
     password:  String,
     interface: String
   ): GetContentType = {
-    val url = s"http://$routerIp/$deviceInfoUri"
-    val initialResponse = client.request(GET(url).addTimeout(timeoutMs))
-    if (initialResponse.code != 401) {
-      None
+    val dataResponse = client.request(GET(s"http://$routerIp/$deviceInfoUri").addBasicAuth(username, password).addTimeout(timeoutMs))
+    if (dataResponse.code == 401) {
+      Some(Left(DetectionError.of("Invalid username or password")))
+    } else if (dataResponse.code == 200 && dataResponse.bodyString.contains(stringToBePresent)) {
+      Some(Right(dataResponse.bodyString))
     } else {
-      val dataResponse = client.request(GET(url).addBasicAuth(username, password).addTimeout(timeoutMs))
-      if (dataResponse.code == 401) {
-        Some(Left(DetectionError.of("Invalid username or password")))
-      } else if (!dataResponse.bodyString.contains(stringToBePresent)) {
-        None
-      } else {
-        Some(Right(dataResponse.bodyString))
-      }
+      None
     }
   }
 
