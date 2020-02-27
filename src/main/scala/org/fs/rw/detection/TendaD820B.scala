@@ -48,6 +48,7 @@ object TendaD820B extends Detector {
       val lineUp = (dslStatusTable \\ "td")(1).trimmedText startsWith "Showtime/Data"
       val modulation = parseModulationOption((deviceInfoTable \\ "td")(11).trimmedText)
       import Modulation._
+      val restrictedModulation = (modulation contains ADSL1) || (modulation contains G_LITE)
       RouterInfo(
         timestamp      = DateTime.now,
         firmwareOption = Some((deviceInfoTable \\ "td")(1).trimmedText),
@@ -65,17 +66,17 @@ object TendaD820B extends Detector {
           snrMarginOption              = noneIfDownAndZero(lineUp, parseDoubleOption((dslStatusTable \\ "td")(18).trimmedText)),
           lineAttenuationOption        = noneIfDownAndZero(lineUp, parseDoubleOption((dslStatusTable \\ "td")(15).trimmedText)),
           dataRateOption               = noneIfDownAndZero(lineUp, parseIntOption((dslStatusTable \\ "td")(10).trimmedText)),
-          crcErrorsOption              = parseIntOption((countersTable \\ "td")(if (modulation contains ADSL1) 6 else 4).trimmedText),
-          erroredSecondsOption         = if (modulation contains ADSL1) None else parseIntOption((countersTable \\ "td")(10).trimmedText),
-          severelyErroredSecondsOption = if (modulation contains ADSL1) None else parseIntOption((countersTable \\ "td")(13).trimmedText)
+          crcErrorsOption              = parseIntOption((countersTable \\ "td")(if (restrictedModulation) 6 else 4).trimmedText),
+          erroredSecondsOption         = if (restrictedModulation) None else parseIntOption((countersTable \\ "td")(10).trimmedText),
+          severelyErroredSecondsOption = if (restrictedModulation) None else parseIntOption((countersTable \\ "td")(13).trimmedText)
         ),
         upstream   = RouterStream(
           snrMarginOption              = noneIfDownAndZero(lineUp, parseDoubleOption((dslStatusTable \\ "td")(19).trimmedText)),
           lineAttenuationOption        = noneIfDownAndZero(lineUp, parseDoubleOption((dslStatusTable \\ "td")(16).trimmedText)),
           dataRateOption               = noneIfDownAndZero(lineUp, parseIntOption((dslStatusTable \\ "td")(9).trimmedText)),
-          crcErrorsOption              = parseIntOption((countersTable \\ "td")(if (modulation contains ADSL1) 8 else 5).trimmedText),
-          erroredSecondsOption         = if (modulation contains ADSL1) None else parseIntOption((countersTable \\ "td")(11).trimmedText),
-          severelyErroredSecondsOption = if (modulation contains ADSL1) None else parseIntOption((countersTable \\ "td")(14).trimmedText)
+          crcErrorsOption              = parseIntOption((countersTable \\ "td")(if (restrictedModulation) 8 else 5).trimmedText),
+          erroredSecondsOption         = if (restrictedModulation) None else parseIntOption((countersTable \\ "td")(11).trimmedText),
+          severelyErroredSecondsOption = if (restrictedModulation) None else parseIntOption((countersTable \\ "td")(14).trimmedText)
         ),
         //
         // Error counters
@@ -99,6 +100,7 @@ object TendaD820B extends Detector {
   private def parseModulationOption(s: String): Option[Modulation] = {
     notAvailableOr(s, {
       s.toLowerCase match {
+        case "g.lite" => Modulation.G_LITE
         case "g.dmt"  => Modulation.ADSL1
         case "adsl2+" => Modulation.ADSL2PLUS
         case _        => Modulation.valueOf(s)
