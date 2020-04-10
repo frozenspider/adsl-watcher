@@ -100,10 +100,10 @@ object TendaD820B extends Detector {
   private def parseModulationOption(s: String): Option[Modulation] = {
     notAvailableOr(s, {
       s.toLowerCase match {
-        case "g.lite" => Modulation.G_LITE
-        case "g.dmt"  => Modulation.ADSL1
-        case "adsl2+" => Modulation.ADSL2PLUS
-        case _        => Modulation.valueOf(s)
+        case "g.lite"                   => Modulation.G_LITE
+        case "g.dmt"                    => Modulation.ADSL1
+        case x if x startsWith "adsl2+" => Modulation.ADSL2PLUS
+        case _                          => Modulation.valueOf(s)
       }
     })
   }
