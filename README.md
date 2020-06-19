@@ -23,6 +23,7 @@ Changelog
 ---------
 
 ### SNAPSHOT
+* Detecting and logging network partitions
 * Support for several more modulation types:
   * G.dmt
   * G.lite

@@ -22,6 +22,7 @@ class SlickDao(config: Config) extends Dao with Logging {
 
   private val routerInfoRecords = TableQuery[RouterInfoRecords]
   private val detectionErrors = TableQuery[DetectionErrors]
+  private val networkPartitions = TableQuery[NetworkPartitions]
 
   override def setup(): Unit = {
     log.info("Running migrations")
@@ -47,6 +48,11 @@ class SlickDao(config: Config) extends Dao with Logging {
     log.debug("Message saved")
   }
 
+  override def saveNetworkPartition(partition: NetworkPartition): Unit = {
+    (networkPartitions += partition).exec()
+    log.debug("Network parition saved")
+  }
+
   override def tearDown(): Unit = {
     database.close()
   }
@@ -64,19 +70,19 @@ class SlickDao(config: Config) extends Dao with Logging {
   /** Slick mapping */
   private object Mapping {
     implicit val DateTimeMapper =
-      MappedColumnType.base[DateTime, java.sql.Timestamp] (
+      MappedColumnType.base[DateTime, java.sql.Timestamp](
         v => new java.sql.Timestamp(v.getMillis),
         v => new DateTime(v.getTime)
       )
 
     implicit val ModulationMapper =
-      MappedColumnType.base[Modulation, String] (
+      MappedColumnType.base[Modulation, String](
         v => v.toString,
         v => Modulation.valueOf(v)
       )
 
     implicit val AnnexModeMapper =
-      MappedColumnType.base[AnnexMode, String] (
+      MappedColumnType.base[AnnexMode, String](
         v => v.toString,
         v => AnnexMode.valueOf(v)
       )
@@ -166,6 +172,22 @@ class SlickDao(config: Config) extends Dao with Logging {
     class DetectionErrors(tag: Tag) extends BaseTable[DetectionError](tag, "errors") {
       def message = column[String]("message")
       def * = (id.?, timestamp, message) <> ((DetectionError.apply _).tupled, DetectionError.unapply)
+    }
+
+    class NetworkPartitions(tag: Tag) extends Table[NetworkPartition](tag, "network_partitions") {
+      def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+      def startTime = column[DateTime]("start_time")
+      def endTime = column[DateTime]("end_time")
+      def duration = column[Int]("duration")
+      def message = column[Option[String]]("message")
+
+      def * = (
+        id.?,
+        startTime,
+        endTime,
+        duration,
+        message
+      ) <> (NetworkPartition.tupled, NetworkPartition.unapply)
     }
   }
 }

@@ -4,6 +4,7 @@ import java.io.File
 
 import org.fs.rw.database.SlickDao
 import org.fs.rw.detection._
+import org.fs.rw.networkstate._
 import org.slf4s.Logging
 
 import com.typesafe.config.Config
@@ -33,10 +34,19 @@ object AdslWatcherMain extends App with Logging {
     config   = config
   )
 
+  val netWatcher = {
+    val checker: NetworkStateChecker = new ReachableChecker()
+    new NetworkStateWatcher(
+      checker = checker,
+      dao     = dao
+    )
+  }
+
   {
     import BuildInfo._
     log.info(s"$name v$version b${buildInfoBuildNumber} started, awaiting 10 seconds")
   }
   Thread.sleep(10 * 1000)
   iterator.start()
+  netWatcher.start()
 }
