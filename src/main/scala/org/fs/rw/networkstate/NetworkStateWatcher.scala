@@ -34,9 +34,13 @@ class NetworkStateWatcher(
       while (!Thread.interrupted()) {
         val beforeTime = System.currentTimeMillis
         execNotFasterThan(PeriodMs) {
-          val up = checker.isUp
-          historyStack = (HistoryEntry(beforeTime, up) +: historyStack) take NumEntriesToLook
-          historyUpdated()
+          try {
+            val up = checker.isUp
+            historyStack = (HistoryEntry(beforeTime, up) +: historyStack) take NumEntriesToLook
+            historyUpdated()
+          } catch {
+            case th: Throwable => log.warn("Exception during iteration:", th)
+          }
         }
       }
     }
@@ -54,7 +58,7 @@ class NetworkStateWatcher(
             case (Some(partitionStartTimeMs), Some(HistoryEntry(restoreTimeMs, _))) =>
               // Partition over, let's log it
               val durationMs = restoreTimeMs - partitionStartTimeMs
-              log.debug(s"Network was broked for ${durationMs.hhMmSsString}!")
+              log.debug(s"Network was broken for ${durationMs.hhMmSsString}!")
               val partition = NetworkPartition(
                 startTime        = new DateTime(partitionStartTimeMs),
                 endTime          = new DateTime(restoreTimeMs),
@@ -65,8 +69,9 @@ class NetworkStateWatcher(
               partitionStart = None
             case (None, None) =>
               // Partition!
-              log.debug(s"Network partition (${msToS(NumEntriesToLook * PeriodMs)} seconds ago)!")
-              partitionStart = Some(historyStack.last.timeMs)
+              val startTime = historyStack.last.timeMs
+              log.debug(s"Network partition (${msToS(System.currentTimeMillis - startTime)} seconds ago)!")
+              partitionStart = Some(startTime)
             case _ =>
               // State unchanged, NOOP
               ()

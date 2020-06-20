@@ -50,7 +50,7 @@ class SlickDao(config: Config) extends Dao with Logging {
 
   override def saveNetworkPartition(partition: NetworkPartition): Unit = {
     (networkPartitions += partition).exec()
-    log.debug("Network parition saved")
+    log.debug(s"Network parition saved: ${partition}")
   }
 
   override def tearDown(): Unit = {

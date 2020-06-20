@@ -35,7 +35,7 @@ object AdslWatcherMain extends App with Logging {
   )
 
   val netWatcher = {
-    val checker: NetworkStateChecker = new ReachableChecker()
+    val checker: NetworkStateChecker = new ReachableChecker
     new NetworkStateWatcher(
       checker = checker,
       dao     = dao

@@ -1,20 +1,20 @@
 package org.fs.rw.networkstate
 
 import java.net.InetAddress
+import java.util.concurrent.TimeoutException
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Promise
-import scala.util.Success
-import scala.util.Failure
 import scala.concurrent.Await
+import scala.concurrent.Promise
 import scala.concurrent.duration._
-import org.fs.rw.utility.Imports
+import scala.util.Failure
 
-class ReachableChecker extends NetworkStateChecker {
+import org.fs.rw.utility.Imports
+import org.slf4s.Logging
+
+class ReachableChecker extends NetworkStateChecker with Logging {
   private val threadName = "reachable-checker"
   private val host = "8.8.8.8"
-  private val timeoutMs = 800
+  private val timeoutMs = 850
   private lazy val addr = InetAddress.getByName(host)
 
   private var thread: Thread = new Thread(threadName)
@@ -24,7 +24,7 @@ class ReachableChecker extends NetworkStateChecker {
     val promise = Promise[Boolean]
     thread = new Thread(() => {
       try {
-        promise.success(addr.isReachable(timeoutMs - 25))
+        promise.success(addr.isReachable(timeoutMs - 50))
       } catch {
         case th: Throwable => promise.failure(th)
       }
@@ -35,6 +35,13 @@ class ReachableChecker extends NetworkStateChecker {
       Await.result(future, timeoutMs.millis)
     } catch {
       case th: Throwable =>
+        (future.value match {
+          case Some(Failure(th2)) => th2
+          case _                  => th
+        }) match {
+          case _: TimeoutException => // Logging a timeout is not too exciting
+          case th                  => log.warn("Failed to check network status:", th)
+        }
         thread.interrupt()
         false
     }
@@ -42,6 +49,14 @@ class ReachableChecker extends NetworkStateChecker {
 }
 
 object ReachableChecker extends App with Imports {
+  val nis = Imports.networkInterfaces
+//  nis.sortBy(_.getName).foreach(println)
+//  for (ni <- nis) {
+//    val checker = new ReachableChecker(Some(ni))
+//    if (checker.isUp) {
+//      println(ni)
+//    }
+//  }
   val checker = new ReachableChecker
   for (i <- 1 to 100) {
     execNotFasterThan(1000) {

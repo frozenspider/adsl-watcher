@@ -1,5 +1,9 @@
 package org.fs.rw.utility
 
+import java.net.NetworkInterface
+
+import scala.collection.JavaConverters._
+
 trait Imports
     extends com.github.nscala_time.time.Imports
     with org.fs.utility.Imports
@@ -12,6 +16,10 @@ trait Imports
     val endTime = System.currentTimeMillis
     val nextTime = startTime + minTimeMs
     Thread.sleep((nextTime - endTime) max 0L)
+  }
+
+  def networkInterfaces: Seq[NetworkInterface] = {
+    NetworkInterface.getNetworkInterfaces.asScala.toSeq
   }
 }
 
