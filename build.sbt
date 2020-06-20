@@ -1,5 +1,5 @@
 name         := "adsl-watcher"
-version      := "1.6-SNAPSHOT"
+version      := "1.7"
 scalaVersion := "2.12.3"
 
 sourceManaged            := baseDirectory.value / "src_managed"
