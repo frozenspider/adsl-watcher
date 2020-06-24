@@ -17,14 +17,13 @@ import org.slf4s.Logging
 class ReachableChecker extends NetworkStateChecker with Logging {
   private val threadName = "reachable-checker"
   private val host = "8.8.8.8"
-  private val timeoutMs = 850
   private lazy val addr = InetAddress.getByName(host)
 
   private val winsockRegex = "Unrecognized Windows Sockets error: (.+)".r
 
   private var thread: Thread = new Thread(threadName)
 
-  override def isUp(): Boolean = {
+  override def isUp(timeoutMs: Int): Boolean = {
     require(!thread.isAlive, "Thread is still alive!")
     val promise = Promise[Boolean]
     thread = new Thread(() => {
@@ -74,7 +73,7 @@ object ReachableChecker extends App with Imports {
   val checker = new ReachableChecker
   for (i <- 1 to 100) {
     execNotFasterThan(1000) {
-      println(checker.isUp)
+      println(checker.isUp(850))
     }
   }
 }
