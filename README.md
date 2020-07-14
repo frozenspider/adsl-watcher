@@ -22,6 +22,8 @@ Tenda D820B         | None
 Changelog
 ---------
 
+### SNAPSHOT
+
 ### 1.7
 * Detecting and logging network partitions
 * Support for several more modulation types:
