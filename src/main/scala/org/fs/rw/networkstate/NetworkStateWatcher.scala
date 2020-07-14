@@ -23,20 +23,24 @@ class NetworkStateWatcher(
     private val NumEntriesToLook = 5
 
     /** How often do we want to issue a network request? */
-    private val PeriodMs = 1000
+    private val PeriodMs = 2000
 
     private var historyStack: IndexedSeq[HistoryEntry] = IndexedSeq.empty
-    private var partitionStart: Option[Long] = None
+    private var currPartition: Option[NetworkPartition] = None
 
-    require(NumEntriesToLook >= 2)
+    require(NumEntriesToLook >= 3)
 
     override def run(): Unit = {
       while (!Thread.interrupted()) {
         val beforeTime = System.currentTimeMillis
         execNotFasterThan(PeriodMs) {
-          val up = checker.isUp
-          historyStack = (HistoryEntry(beforeTime, up) +: historyStack) take NumEntriesToLook
-          historyUpdated()
+          try {
+            val up = checker.isUp(PeriodMs - 150)
+            historyStack = (HistoryEntry(beforeTime, up) +: historyStack) take NumEntriesToLook
+            historyUpdated()
+          } catch {
+            case th: Throwable => log.warn("Exception during iteration:", th)
+          }
         }
       }
     }
@@ -50,23 +54,26 @@ class NetworkStateWatcher(
           // We were e.g. hibernating or something, stack is invalid
           historyStack = IndexedSeq.empty
         } else {
-          (partitionStart, historyStack.find(_.up)) match {
-            case (Some(partitionStartTimeMs), Some(HistoryEntry(restoreTimeMs, _))) =>
-              // Partition over, let's log it
-              val durationMs = restoreTimeMs - partitionStartTimeMs
-              log.debug(s"Network was broked for ${durationMs.hhMmSsString}!")
-              val partition = NetworkPartition(
-                startTime        = new DateTime(partitionStartTimeMs),
-                endTime          = new DateTime(restoreTimeMs),
-                duration         = msToS(durationMs),
-                logMessageOption = None
-              )
-              dao.saveNetworkPartition(partition)
-              partitionStart = None
-            case (None, None) =>
+          val historyStackUp = historyStack.filter(_.up)
+          val isUp = historyStackUp.size >= 3
+          val isDown = historyStackUp.isEmpty
+          currPartition match {
+            case Some(partition) if isUp =>
+              // Partition is over
+              val restoreTimeMs = historyStackUp.last.timeMs
+              val durationMs = restoreTimeMs - partition.startTime.getMillis
+              log.debug(s"Network restored (${msToS(System.currentTimeMillis - restoreTimeMs)} seconds ago"
+                + s", was broken for ${durationMs.hhMmSsString})")
+              dao.updateNetworkPartition(partition.copy(
+                endTimeOption  = Some(new DateTime(restoreTimeMs)),
+                durationOption = Some(msToS(durationMs))
+              ))
+              currPartition = None
+            case None if isDown =>
               // Partition!
-              log.debug(s"Network partition (${msToS(NumEntriesToLook * PeriodMs)} seconds ago)!")
-              partitionStart = Some(historyStack.last.timeMs)
+              val startTimeMs = historyStack.last.timeMs
+              log.debug(s"Network partition (${msToS(System.currentTimeMillis - startTimeMs)} seconds ago)!")
+              currPartition = Some(dao.saveNetworkPartition(new DateTime(startTimeMs)))
             case _ =>
               // State unchanged, NOOP
               ()
@@ -76,7 +83,7 @@ class NetworkStateWatcher(
     }
 
     private def msToS(ms: Long): Int = {
-       math.round(ms / 1000.0d).toInt
+      math.round(ms / 1000.0d).toInt
     }
 
     private case class HistoryEntry(timeMs: Long, up: Boolean)

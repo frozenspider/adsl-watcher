@@ -48,9 +48,20 @@ class SlickDao(config: Config) extends Dao with Logging {
     log.debug("Message saved")
   }
 
-  override def saveNetworkPartition(partition: NetworkPartition): Unit = {
-    (networkPartitions += partition).exec()
-    log.debug("Network parition saved")
+  def saveNetworkPartition(startTime: DateTime): NetworkPartition = {
+    val unsaved = NetworkPartition(startTime = startTime)
+    val savedId = ((networkPartitions returning networkPartitions.map(_.id)) += unsaved).exec()
+    val saved = unsaved.copy(id = Some(savedId))
+    log.debug(s"Network parition saved: ${saved}")
+    saved
+  }
+
+  def updateNetworkPartition(partition: NetworkPartition): Unit = {
+    networkPartitions
+      .filter(_.id === partition.id)
+      .update(partition)
+      .exec()
+    log.debug(s"Network parition updated: ${partition}")
   }
 
   override def tearDown(): Unit = {
@@ -177,16 +188,16 @@ class SlickDao(config: Config) extends Dao with Logging {
     class NetworkPartitions(tag: Tag) extends Table[NetworkPartition](tag, "network_partitions") {
       def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
       def startTime = column[DateTime]("start_time")
-      def endTime = column[DateTime]("end_time")
-      def duration = column[Int]("duration")
-      def message = column[Option[String]]("message")
+      def endTimeOption = column[Option[DateTime]]("end_time")
+      def durationOption = column[Option[Int]]("duration")
+      def messageOption = column[Option[String]]("message")
 
       def * = (
         id.?,
         startTime,
-        endTime,
-        duration,
-        message
+        endTimeOption,
+        durationOption,
+        messageOption
       ) <> (NetworkPartition.tupled, NetworkPartition.unapply)
     }
   }
