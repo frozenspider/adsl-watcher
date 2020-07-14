@@ -23,10 +23,15 @@
         </encoder>
     </appender>
 
-    <logger name="slick" level="INFO" />
-
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
+
+    <logger name="org.fs.rw.database" level="INFO" />
+    <logger name="org.fs.rw.detection" level="INFO" />
+
+    <logger name="org.apache.http" level="INFO" />
+    <logger name="org.flywaydb.core" level="INFO" />
+    <logger name="slick" level="INFO" />
 </configuration>
