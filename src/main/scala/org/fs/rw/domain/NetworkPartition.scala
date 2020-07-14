@@ -3,9 +3,9 @@ package org.fs.rw.domain
 import org.joda.time.DateTime
 
 case class NetworkPartition(
-  id:               Option[Int]    = None,
+  id:               Option[Int]      = None,
   startTime:        DateTime,
-  endTime:          DateTime,
-  duration:         Int, // In seconds
-  logMessageOption: Option[String]
+  endTimeOption:    Option[DateTime] = None,
+  durationOption:   Option[Int]      = None, // In seconds
+  logMessageOption: Option[String]   = None
 )

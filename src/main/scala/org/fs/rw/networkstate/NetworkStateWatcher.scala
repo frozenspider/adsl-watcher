@@ -26,7 +26,7 @@ class NetworkStateWatcher(
     private val PeriodMs = 2000
 
     private var historyStack: IndexedSeq[HistoryEntry] = IndexedSeq.empty
-    private var partitionStart: Option[Long] = None
+    private var currPartition: Option[NetworkPartition] = None
 
     require(NumEntriesToLook >= 3)
 
@@ -57,26 +57,23 @@ class NetworkStateWatcher(
           val historyStackUp = historyStack.filter(_.up)
           val isUp = historyStackUp.size >= 3
           val isDown = historyStackUp.isEmpty
-          partitionStart match {
-            case Some(partitionStartTimeMs) if isUp =>
+          currPartition match {
+            case Some(partition) if isUp =>
               // Partition is over
               val restoreTimeMs = historyStackUp.last.timeMs
-              val durationMs = restoreTimeMs - partitionStartTimeMs
+              val durationMs = restoreTimeMs - partition.startTime.getMillis
               log.debug(s"Network restored (${msToS(System.currentTimeMillis - restoreTimeMs)} seconds ago"
                 + s", was broken for ${durationMs.hhMmSsString})")
-              val partition = NetworkPartition(
-                startTime        = new DateTime(partitionStartTimeMs),
-                endTime          = new DateTime(restoreTimeMs),
-                duration         = msToS(durationMs),
-                logMessageOption = None
-              )
-              dao.saveNetworkPartition(partition)
-              partitionStart = None
+              dao.updateNetworkPartition(partition.copy(
+                endTimeOption  = Some(new DateTime(restoreTimeMs)),
+                durationOption = Some(msToS(durationMs))
+              ))
+              currPartition = None
             case None if isDown =>
               // Partition!
               val startTimeMs = historyStack.last.timeMs
               log.debug(s"Network partition (${msToS(System.currentTimeMillis - startTimeMs)} seconds ago)!")
-              partitionStart = Some(startTimeMs)
+              currPartition = Some(dao.saveNetworkPartition(new DateTime(startTimeMs)))
             case _ =>
               // State unchanged, NOOP
               ()
@@ -86,7 +83,7 @@ class NetworkStateWatcher(
     }
 
     private def msToS(ms: Long): Int = {
-       math.round(ms / 1000.0d).toInt
+      math.round(ms / 1000.0d).toInt
     }
 
     private case class HistoryEntry(timeMs: Long, up: Boolean)
