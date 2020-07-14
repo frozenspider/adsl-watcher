@@ -12,8 +12,7 @@ class DetectionIterator(
   executor: DetectionExecutor,
   dao:      Dao,
   config:   Config
-)
-  extends Logging {
+) extends Logging {
 
   var threadOption: Option[Thread] = None
 
@@ -49,7 +48,7 @@ class DetectionIterator(
         val message = executor.detect(host, username, password, interface)
         dao.saveMessage(message)
       }
-    })
+    }, "detection-iterator")
     thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
       override def uncaughtException(thread: Thread, ex: Throwable): Unit =
         log.error("Exception in thread execution", ex)

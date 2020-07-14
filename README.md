@@ -22,6 +22,13 @@ Tenda D820B         | None
 Changelog
 ---------
 
+### 1.7
+* Detecting and logging network partitions
+* Support for several more modulation types:
+  * G.dmt
+  * G.lite
+  * ADSL2+ Auto
+
 ### 1.6
 * Renamed project from `router-watcher` to `adsl-watcher`
 * Detector for Tenda D820B
