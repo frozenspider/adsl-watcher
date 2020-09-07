@@ -16,8 +16,8 @@ import org.slf4s.Logging
 
 class ReachableChecker extends NetworkStateChecker with Logging {
   private val threadName = "reachable-checker"
-  private val host = "8.8.8.8"
-  private lazy val addr = InetAddress.getByName(host)
+  private val hosts = Seq("8.8.8.8", "8.8.4.4")
+  private lazy val addrs = hosts map InetAddress.getByName
 
   private val winsockRegex = "Unrecognized Windows Sockets error: (.+)".r
 
@@ -28,7 +28,8 @@ class ReachableChecker extends NetworkStateChecker with Logging {
     val promise = Promise[Boolean]
     thread = new Thread(() => {
       try {
-        promise.success(addr.isReachable(timeoutMs - 50))
+        // Query all addresses in parallel, we're satisfied if any is reachable
+        promise.success(addrs.par.exists(_.isReachable(timeoutMs - 50)))
       } catch {
         case th: Throwable => promise.failure(th)
       }

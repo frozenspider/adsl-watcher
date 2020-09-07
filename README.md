@@ -23,6 +23,7 @@ Changelog
 ---------
 
 ### SNAPSHOT
+* Partitions detection now queries multiple addresses in parallel (addresses are hardcoded to 8.8.8.8 and 8.8.4.4)
 
 ### 1.7
 * Detecting and logging network partitions
