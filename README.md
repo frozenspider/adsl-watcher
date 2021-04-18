@@ -23,6 +23,7 @@ Changelog
 ---------
 
 ### SNAPSHOT
+* Deleting "device" config path allows checking network state without monitoring ADSL modem.
 * Partitions detection now queries multiple addresses in parallel (addresses are hardcoded to 8.8.8.8 and 8.8.4.4)
 
 ### 1.7

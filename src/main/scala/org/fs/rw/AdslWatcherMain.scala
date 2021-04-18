@@ -13,26 +13,33 @@ import com.typesafe.config.ConfigFactory
 object AdslWatcherMain extends App with Logging {
 
   val config: Config = ConfigFactory.parseFileAnySyntax(new File("application.conf"))
-  if (!config.hasPath("device")) {
+  if (!config.hasPath("db")) {
     log.error("Config file not found or is invalid")
     scala.sys.exit(1)
   }
 
-  val detectors: Seq[Detector] = Seq(
-    UpvelUR344AN4GPlus, TendaD820B
-  )
-  val executor: org.fs.rw.DetectionExecutor = new DetectionExecutor(detectors = detectors)
   val dao: SlickDao = new SlickDao(config = config)
   scala.sys.addShutdownHook {
     dao.tearDown()
     log.info("Shutdown complete")
   }
 
-  val iterator: DetectionIterator = new DetectionIterator(
-    executor = executor,
-    dao      = dao,
-    config   = config
-  )
+  val iteratorOption: Option[DetectionIterator] =
+    if (config.hasPath("device")) {
+      val detectors: Seq[Detector] = Seq(
+        UpvelUR344AN4GPlus, TendaD820B
+      )
+      val executor: org.fs.rw.DetectionExecutor = new DetectionExecutor(detectors = detectors)
+
+      Some(new DetectionIterator(
+        executor = executor,
+        dao      = dao,
+        config   = config
+      ))
+    } else {
+      log.info("No device config, won't monitor ADSL state")
+      None
+    }
 
   val netWatcher = {
     val checker: NetworkStateChecker = new ReachableChecker
@@ -47,6 +54,6 @@ object AdslWatcherMain extends App with Logging {
     log.info(s"$name v$version b${buildInfoBuildNumber} started, awaiting 10 seconds")
   }
   Thread.sleep(10 * 1000)
-  iterator.start()
+  iteratorOption.map(_.start())
   netWatcher.start()
 }
