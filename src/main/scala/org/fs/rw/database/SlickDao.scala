@@ -48,6 +48,10 @@ class SlickDao(config: Config) extends Dao with Logging {
     log.debug("Message saved")
   }
 
+  def loadLatestPartition(): Option[NetworkPartition] = {
+    networkPartitions.sortBy(_.id.desc).take(1).result.headOption.exec()
+  }
+
   def saveNetworkPartition(startTime: DateTime): NetworkPartition = {
     val unsaved = NetworkPartition(startTime = startTime)
     val savedId = ((networkPartitions returning networkPartitions.map(_.id)) += unsaved).exec()
@@ -56,12 +60,13 @@ class SlickDao(config: Config) extends Dao with Logging {
     saved
   }
 
-  def updateNetworkPartition(partition: NetworkPartition): Unit = {
+  def finishNetworkPartition(id: Int, endTime: DateTime, duration: Int): Unit = {
     networkPartitions
-      .filter(_.id === partition.id)
-      .update(partition)
+      .filter(_.id === id)
+      .map(np => (np.endTimeOption, np.durationOption))
+      .update((Some(endTime), Some(duration)))
       .exec()
-    log.debug(s"Network parition updated: ${partition}")
+    log.debug(s"Network parition $id finished")
   }
 
   override def tearDown(): Unit = {

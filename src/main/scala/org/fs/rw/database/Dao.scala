@@ -14,9 +14,11 @@ trait Dao {
   /** Persist the given message */
   def saveMessage(message: Message): Unit
 
+  def loadLatestPartition(): Option[NetworkPartition]
+
   def saveNetworkPartition(startTime: DateTime): NetworkPartition
 
-  def updateNetworkPartition(partition: NetworkPartition): Unit
+  def finishNetworkPartition(id: Int, endTime: DateTime, duration: Int): Unit
 
   /** Terminate all open connections and stuff, safe to call multiple times */
   def tearDown(): Unit

@@ -5,15 +5,23 @@ import org.fs.rw.domain.NetworkPartition
 import org.joda.time.DateTime
 
 object NoopDao extends Dao {
+  private var partitionStack = List.empty[NetworkPartition]
+  
   override def setup(): Unit = {}
 
   override def saveMessage(message: Message): Unit = {}
 
-  def saveNetworkPartition(startTime: DateTime): NetworkPartition = {
-    NetworkPartition(startTime = DateTime.now())
+  def loadLatestPartition(): Option[NetworkPartition] = {
+    partitionStack.headOption
   }
 
-  def updateNetworkPartition(partition: NetworkPartition): Unit = {}
+  def saveNetworkPartition(startTime: DateTime): NetworkPartition = {
+    val np = NetworkPartition(startTime = DateTime.now())
+    partitionStack = np +: partitionStack
+    np
+  }
+
+  def finishNetworkPartition(id: Int, endTime: DateTime, duration: Int): Unit = {}
 
   override def tearDown(): Unit = {}
 }

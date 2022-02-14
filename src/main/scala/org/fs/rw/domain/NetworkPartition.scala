@@ -8,4 +8,8 @@ case class NetworkPartition(
   endTimeOption:    Option[DateTime] = None,
   durationOption:   Option[Int]      = None, // In seconds
   logMessageOption: Option[String]   = None
-)
+) {
+  def hasEnded: Boolean = {
+    endTimeOption.nonEmpty
+  }
+}

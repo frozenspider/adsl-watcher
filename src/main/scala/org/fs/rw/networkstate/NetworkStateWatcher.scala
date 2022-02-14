@@ -26,7 +26,7 @@ class NetworkStateWatcher(
     private val PeriodMs = 2000
 
     private var historyStack: IndexedSeq[HistoryEntry] = IndexedSeq.empty
-    private var currPartition: Option[NetworkPartition] = None
+    private var partitionInProgress: Boolean = false
 
     require(NumEntriesToLook >= 3)
 
@@ -57,23 +57,30 @@ class NetworkStateWatcher(
           val historyStackUp = historyStack.filter(_.up)
           val isUp = historyStackUp.size >= 3
           val isDown = historyStackUp.isEmpty
-          currPartition match {
-            case Some(partition) if isUp =>
+          partitionInProgress match {
+            case true if isUp =>
               // Partition is over
-              val restoreTimeMs = historyStackUp.last.timeMs
-              val durationMs = restoreTimeMs - partition.startTime.getMillis
-              log.debug(s"Network restored (${msToS(System.currentTimeMillis - restoreTimeMs)} seconds ago"
-                + s", was broken for ${durationMs.hhMmSsString})")
-              dao.updateNetworkPartition(partition.copy(
-                endTimeOption  = Some(new DateTime(restoreTimeMs)),
-                durationOption = Some(msToS(durationMs))
-              ))
-              currPartition = None
-            case None if isDown =>
+              dao.loadLatestPartition() match {
+                case Some(partition) if !partition.hasEnded =>
+                  val restoreTimeMs = historyStackUp.last.timeMs
+                  val durationMs = restoreTimeMs - partition.startTime.getMillis
+                  log.debug(s"Network restored (${msToS(System.currentTimeMillis - restoreTimeMs)} seconds ago"
+                    + s", was broken for ${durationMs.hhMmSsString})")
+                  dao.finishNetworkPartition(
+                    partition.id.get,
+                    new DateTime(restoreTimeMs),
+                    msToS(durationMs)
+                  )
+                case _ =>
+                  log.warn("Current partition is either outdated or invalid!")
+              }
+              partitionInProgress = false
+            case false if isDown =>
               // Partition!
               val startTimeMs = historyStack.last.timeMs
               log.debug(s"Network partition (${msToS(System.currentTimeMillis - startTimeMs)} seconds ago)!")
-              currPartition = Some(dao.saveNetworkPartition(new DateTime(startTimeMs)))
+              dao.saveNetworkPartition(new DateTime(startTimeMs))
+              partitionInProgress = true
             case _ =>
               // State unchanged, NOOP
               ()
